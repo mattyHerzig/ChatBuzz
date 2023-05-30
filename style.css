@@ -1,0 +1,52 @@
+#space {
+  width: 400px;
+  height: 300px;
+  background: transparent;
+  border: 1px solid black;
+  overflow: hidden;
+  display: flex;
+  justify-content: flex-start;
+  flex-direction: column-reverse;
+}
+
+.repeat {
+  font-family: 'Courier New', Courier, monospace;
+  font-weight: bold;
+  font-size: 20px;
+  color:rgb(98, 81, 228);
+  -webkit-text-stroke: 1px rgb(86, 73, 190);
+  position: relative;
+  left: 10px;
+  bottom: 7px;
+  margin-bottom: 5px;
+  margin: 1px 0;
+  white-space: nowrap;
+}
+
+.spawn_anim {
+  animation-name: spawn;
+  animation-duration: 0.1s;
+  transform-origin: left;
+} @keyframes spawn {
+  0% {transform: scale(0.75);}
+  100% {transform: scale(1);}
+}
+
+.pop_anim {
+  animation-name: Pop;
+  animation-duration: 0.25s;
+  transform-origin: left;
+} @keyframes Pop {
+  0% {transform: scale(1);}
+  50% {transform: scale(1.1);}
+  100% {transform: scale(1);}
+}
+
+.shrink_anim {
+  animation-name: Shrink;
+  animation-duration: 0.1s;
+  transform-origin: left;
+} @keyframes Shrink {
+  0% {transform: scale(1);}
+  100% {transform: scale(0.75);}
+}
