@@ -44,7 +44,10 @@ const spaceElement = document.getElementById('space');
 if (!spaceElement)
     throw new Error('spaceElement null');
 if (!username) {
-    spaceElement.textContent = '?user=<CHANNEL_NAME>"[&min=<MINIMUM_MESSAGE_COUNT>&dur=<MESSAGE_DURATION>]';
+    spaceElement.textContent = '?user=<CHANNEL_NAME>"';
+    spaceElement.textContent += '[&min=<MINIMUM_MESSAGE_COUNT>&dur=<MESSAGE_DURATION>]';
+    spaceElement.textContent += '\nwidth: 400px, height: 300px';
+    spaceElement.textContent += '\nAdd audio source seperately';
     throw new Error('username null');
 }
 const utterance = new SpeechSynthesisUtterance();

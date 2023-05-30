@@ -1,8 +1,10 @@
 #space {
   width: 400px;
   height: 300px;
-  background: transparent;
-  border: 1px solid black;
+  position:absolute;
+  top: 0;
+  left: 0;
+  /* border: 1px solid black; */
   overflow: hidden;
   display: flex;
   justify-content: flex-start;
