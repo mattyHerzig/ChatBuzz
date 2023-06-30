@@ -1,7 +1,7 @@
 #space {
   width: 960px;
   height: 540px;
-  position:absolute;
+  position: absolute;
   top: 0;
   left: 0;
   /* border: 1px solid black; */
@@ -26,10 +26,10 @@
 }
 
 .spawn_anim {
-  animation-name: spawn;
+  animation-name: Spawn;
   animation-duration: 0.1s;
   transform-origin: left;
-} @keyframes spawn {
+} @keyframes Spawn {
   0% {transform: scale(0.75);}
   100% {transform: scale(1);}
 }

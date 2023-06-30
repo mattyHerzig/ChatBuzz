@@ -10,11 +10,17 @@ if(minReapeatCountStr) {
   if(minRepeatCount < 2) minRepeatCount = 2;
 }
 
-let repeatTimeout = 10;
+let repeatTimeout = 7;
 const repeatTimeoutStr = urlParams.get('dur');
 if(repeatTimeoutStr) {
   repeatTimeout = parseInt(repeatTimeoutStr);
-  if(repeatTimeout < 1) minRepeatCount = 1;
+  if(repeatTimeout < 1) repeatTimeout = 1;
+}
+
+let tts = true;
+const ttsStr = urlParams.get('tts');
+if(ttsStr) {
+  if(ttsStr == 'f') tts = false;
 }
 
 const spaceElement = document.getElementById('space');  
@@ -26,12 +32,6 @@ if(!username) {
   spaceElement.textContent += '\nAdd audio source seperately';
   throw new Error('username null');
 }
-
-const utterance = new SpeechSynthesisUtterance();
-const speechSynthesis = window.speechSynthesis as any;
-utterance.volume = 0.75;
-utterance.rate = 0.8;
-utterance.pitch = 2;
 
 // @ts-ignore
 import * as tmi from 'tmi.js'
@@ -75,8 +75,13 @@ client.on('message', (channel: any, tags: any, message: string, self: any) => {
           repeatElement.classList.add('pop_anim');
         });
         foundRepeat.element = spaceElement.appendChild(repeatElement);
-        utterance.text = foundRepeat.message;
-        speechSynthesis.speak(utterance);
+        if(tts) {
+          const utterance = new SpeechSynthesisUtterance(foundRepeat.message);
+          utterance.volume = 0.75;
+          utterance.rate = 0.8;
+          utterance.pitch = 2;
+          speechSynthesis.speak(utterance);
+        }
       } else {
         repeatElement.classList.add('pop_anim');
         spaceElement.replaceChild(repeatElement, foundRepeat.element);
