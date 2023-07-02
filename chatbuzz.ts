@@ -34,10 +34,7 @@ vol *= 0.5;
 const spaceElement = document.getElementById('space');  
 if(!spaceElement) throw new Error('spaceElement null');
 if(!username) {
-  spaceElement.textContent = '?user=<CHANNEL_NAME>"';
-  spaceElement.textContent += '[&min=_&dur=_&tts=_&vol=_]';
-  spaceElement.textContent += '\nwidth: 960px, height: 540px';
-  spaceElement.textContent += '\nAdd audio source seperately';
+  spaceElement.textContent = '?user=<CHANNEL_NAME>"[&min=_&dur=_&tts=_&vol=_]';
   throw new Error('username null');
 }
 
