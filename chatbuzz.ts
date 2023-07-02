@@ -23,11 +23,19 @@ if(ttsStr) {
   if(ttsStr == 'f') tts = false;
 }
 
+let vol = 1;
+const volStr = urlParams.get('vol');
+if(volStr) {
+  vol = parseFloat(volStr);
+  if(vol < 0) vol = 1;
+}
+vol *= 0.5;
+
 const spaceElement = document.getElementById('space');  
 if(!spaceElement) throw new Error('spaceElement null');
 if(!username) {
   spaceElement.textContent = '?user=<CHANNEL_NAME>"';
-  spaceElement.textContent += '[&min=<MINIMUM_MESSAGE_COUNT>&dur=<MESSAGE_DURATION>]';
+  spaceElement.textContent += '[&min=_&dur=_&tts=_&vol=_]';
   spaceElement.textContent += '\nwidth: 960px, height: 540px';
   spaceElement.textContent += '\nAdd audio source seperately';
   throw new Error('username null');
@@ -77,7 +85,7 @@ client.on('message', (channel: any, tags: any, message: string, self: any) => {
         foundRepeat.element = spaceElement.appendChild(repeatElement);
         if(tts) {
           const utterance = new SpeechSynthesisUtterance(foundRepeat.message);
-          utterance.volume = 0.75;
+          utterance.volume = vol;
           utterance.rate = 0.8;
           utterance.pitch = 2;
           speechSynthesis.speak(utterance);
