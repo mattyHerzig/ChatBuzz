@@ -22,10 +22,10 @@ In addition, you can also add how ever many arguments to the end as you need, in
 ### Table of Handled Arguments
 | Argument | Definition                                                           | Data Type | Constraints                  | Default Value |
 |----------|----------------------------------------------------------------------|-----------|------------------------------|---------------|
-| min      | Minimum number of identical messages required to display it          | number    | Integer greater than 2       | 2             |
-| dur      | Duration of time (in seconds) that defines a repeat                  | number    | Greater than 0.0             | 7.0           |
-| tts      | Text-To-Speech                                                       | bool      | None                         | true          |
-| vol      | Volume                                                               | number    | Greater than or equal to 0.0 | 1.0           |
+| min      | Minimum number of identical messages required to display it          | number    | Integer greater than or equal to 2 | 2             |
+| dur      | Duration of time (in seconds) that defines a repeat                  | number    | Greater than 0.0                   | 7.0           |
+| tts      | Text-To-Speech                                                       | bool      | None                               | true          |
+| vol      | Volume                                                               | number    | Greater than or equal to 0.0       | 1.0           |
 
 ## About the Project
 ChatBuzz is the first personal project that I can be genuinely be proud of. The need to create it came about when I wanted to personally use OBS Plugin with its certain functionality while streaming on Twitch, but I couldn't find an open-source, public version. In addition, I thought it would be good practice.
