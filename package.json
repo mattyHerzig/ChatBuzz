@@ -1,11 +1,11 @@
 {
   "name": "chatbuzz",
   "version": "1.0.0",
-  "description": "",
+  "description": "Simple OBS Plugin that displays repeated messages from a Twitch chat",
   "main": "./chatbuzz.ts",
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": ["twitch", "twitchtv", "twitch-tv", "obs", "obs-studio", "twitch-api"],
+  "author": "Matty Herzig",
+  "license": "MIT",
   "devDependencies": {
     "tmi.js": "^1.8.5",
     "ts-loader": "^9.4.4",
