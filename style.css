@@ -15,14 +15,47 @@
   font-family: 'Courier New', Courier, monospace;
   font-weight: bold;
   font-size: 40px;
-  color:rgb(98, 81, 228);
-  -webkit-text-stroke: 1px rgb(86, 73, 190);
   position: relative;
   left: 10px;
   bottom: 7px;
   margin-bottom: 5px;
   margin: 1px 0;
   white-space: nowrap;
+}
+
+.pink_color {
+  color:rgb(228, 81, 228);
+  -webkit-text-stroke: 1px rgb(190, 73, 190);
+}
+
+.red_color {
+  color:rgb(228, 81, 81);
+  -webkit-text-stroke: 1px rgb(190, 73, 73);
+}
+
+.orange_color {
+  color:rgb(228, 140, 81);
+  -webkit-text-stroke: 1px rgb(190, 110, 73);
+}
+
+.yellow_color {
+  color:rgb(228, 228, 81);
+  -webkit-text-stroke: 1px rgb(190, 190, 73);
+}
+
+.green_color {
+  color:rgb(81, 228, 98);
+  -webkit-text-stroke: 1px rgb(73, 190, 86);
+}
+
+.blue_color {
+  color:rgb(98, 81, 228);
+  -webkit-text-stroke: 1px rgb(86, 73, 190);
+}
+
+.purple_color {
+  color:rgb(98, 81, 228);
+  -webkit-text-stroke: 1px rgb(86, 73, 190);
 }
 
 .error {

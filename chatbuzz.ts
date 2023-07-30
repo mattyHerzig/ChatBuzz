@@ -1,9 +1,21 @@
 
+// @ts-ignore
+import * as tmi from 'tmi.js'
+
 // get URL parameters
 const urlParams = new URLSearchParams(window.location.search);
 
 // handle 'user' parameter
 const username = urlParams.get('user')?.toLowerCase();
+
+// handle 'color' parameter
+let color = 'purple';
+const colorStr = urlParams.get('color');
+if(colorStr) {
+  if(colorStr == 'pink' || colorStr == 'red' || colorStr == 'orange' ||
+     colorStr == 'yellow' || colorStr == 'green' || colorStr == 'blue' ||
+     colorStr == 'purple') color = colorStr;
+}
 
 // handle 'min' parameter
 let minRepeatCount = 2;
@@ -45,9 +57,8 @@ if(!username) {
   spaceElement.textContent = 'Add "?user=USERNAME" to the end of the URL. Check GitHub documentation for more arguments and info.';
   throw new Error('username null');
 }
-
-// @ts-ignore
-import * as tmi from 'tmi.js'
+// set repeat color
+spaceElement.classList.add(color + '_color');
 
 // create the interface for a repeat
 interface Repeat {

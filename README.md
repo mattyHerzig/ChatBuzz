@@ -11,26 +11,28 @@ ChatBuzz is a simple OBS Plugin that displays repeated messages from a Twitch ch
 * [About the Project](#about-the-project)
   * [Learnings](#learnings)
 * [Future Features (if Warranted)](#future-features-if-warranted)
+* [Developement](#developement)
 * [Contributing](#contributing)
 * [License](#license)
 
 ## URL Arguments
 Your OBS Browser Source URL should look like 'https://chatbuzz.app/?user=USERNAME', with USERNAME being replaced by your Twitch channel's username (case insensitive).
 
-In addition, you can also add how ever many arguments to the end as you need, in any order, in the form '&ARG=PARAMETER'. For example, you may have 'https://chatbuzz.app/?user=xqc&tts=false&min=5&dur=10'
+In addition, you can also add how ever many arguments to the end as you need, in any order, in the form '&ARGUMENT=PARAMETER'. For example, you may have 'https://chatbuzz.app/?user=xqc&tts=false&min=5&dur=10.5&color=red'
 
 ### Table of Handled Arguments
-| Argument | Definition                                                           | Data Type | Constraints                  | Default Value |
-|----------|----------------------------------------------------------------------|-----------|------------------------------|---------------|
-| min      | Minimum number of identical messages required to display it          | number    | Integer greater than 2       | 2             |
-| dur      | Duration of time (in seconds) that defines a repeat                  | number    | Greater than 0.0             | 7.0           |
-| tts      | Text-To-Speech                                                       | bool      | None                         | true          |
-| vol      | Volume                                                               | number    | Greater than or equal to 0.0 | 1.0           |
+| Argument | Definition                                                  | Data Type | Constraints                                    | Default Value |
+|----------|-------------------------------------------------------------|-----------|------------------------------------------------|---------------|
+| color    | Color                                                       | string    | pink, red, orange, yellow, green, blue, purple | purple        |
+| min      | Minimum number of identical messages required to display it | number    | Integer greater than or equal to 2             | 2             |
+| dur      | Duration (in seconds) to limit a repeat to                  | number    | Greater than 0.0                               | 7.0           |
+| tts      | Text-To-Speech                                              | bool      | None                                           | true          |
+| vol      | Volume                                                      | number    | Greater than or equal to 0.0                   | 1.0           |
 
 ## About the Project
 ChatBuzz is the first personal project that I can be genuinely be proud of. The need to create it came about when I wanted to personally use OBS Plugin with its certain functionality while streaming on Twitch, but I couldn't find an open-source, public version. In addition, I thought it would be good practice.
 
-(There exists a similar, widespread OBS Plugin concept of the "Combo". However, this is differentiated from a "Repeat", in that it checks when consecutive messages are identical, whereas, for a Repeat, I used a time duration which ignores consecutive messages)
+(There exists a similar, widespread OBS Plugin concept of the "Combo". However, this is differentiated from a "Repeat", in that it checks when consecutive messages are identical, whereas, for a Repeat, I used a time duration which ignores whether or not a message is consecutive)
 
 Its development involved many, many things that I've never used before (see [Learnings](#learnings) below for more details). 
 
@@ -47,12 +49,12 @@ I even drew the favicon myself (the image that is seen in the website tab) (if y
 - HTML
 - CSS
 - Other Web Development e.g. getting a domain, hosting, favicon
-- Node
+- Node.js
 - APIs (specifically, tmi.js)
 - Webpack
 - Unix shell
 - VSCode (e.g. learning how to efficiently work, utilizing helpful extensions such as Live Preview)
-- Git (through GitHub)
+- Git
 - Project Management
   - Ideation to Completion
   - Adhering to a \[personal\] need
@@ -61,7 +63,7 @@ I even drew the favicon myself (the image that is seen in the website tab) (if y
     - In addition to proper CSS formatting according to my initial vision of the project, I also sought to optimize visibility according to a typical stream, aesthetic value, etc.
   - Research e.g. effective Google habits, helpful tools such as ChatGPT
   - Commenting (even though I'm the only one working on it, I enjoy doing it as well as making clean and elegant code)
-  - I sought to optimize as much as I could e.g. I wasn't afraid to completely redesign the project if I deemed another process better
+  - I sought to optimize as much as I could e.g. experimentation, I wasn't afraid to completely redesign the project if I deemed another process better
   - Publicization
     - Documentation
       - Markdown e.g. this (`README.md`)
@@ -69,7 +71,8 @@ I even drew the favicon myself (the image that is seen in the website tab) (if y
     - Publishing to obsproject.com [here](https://obsproject.com/forum/resources/chatbuzz.1757/)
 
 ## Future Features (if Warranted)
-- CSS customization (change the formatting and styling)
+- Further CSS customization (change the formatting and styling)
+  - E.g. different graphics, such as a smooth color change during the pop animation
 - Display emotes
   - Animated
   - Channel-exclusive
@@ -78,6 +81,28 @@ I even drew the favicon myself (the image that is seen in the website tab) (if y
 - Different voices
 - Works for other platforms e.g. YouTube
 - Create alternative combo version
+
+## Developement
+This section is only for if you are intending on making changes to this project.
+
+#### Prerequisites
+* [Git](https://git-scm.com/downloads)
+* [Node.js](https://nodejs.org/en/download/)
+
+#### Setup
+1. Clone the repo
+```sh
+git clone https://github.com/mattyHerzig/ChatBuzz.git
+cd ChatBuzz
+```
+2. Install NPM packages
+```sh
+npm install
+```
+- Rebuild `bundle.js` whenever `chatbuzz.ts` is changed
+```sh
+npx webpack build
+```
 
 ## Contributing
 Any contributions are greatly appreciated.
