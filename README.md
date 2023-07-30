@@ -30,7 +30,7 @@ In addition, you can also add how ever many arguments to the end as you need, in
 ## About the Project
 ChatBuzz is the first personal project that I can be genuinely be proud of. The need to create it came about when I wanted to personally use OBS Plugin with its certain functionality while streaming on Twitch, but I couldn't find an open-source, public version. In addition, I thought it would be good practice.
 
-(There exists a similar, widespread OBS Plugin concept of the "Combo". However, this is differentiated from a "Repeat", in that it checks when consecutive messages are identical, whereas, for a Repeat, I used a time duration which ignores consecutive messages)
+(There exists a similar, widespread OBS Plugin concept of the "Combo". However, this is differentiated from a "Repeat", in that it checks when consecutive messages are identical, whereas, for a Repeat, I used a time duration which ignores whether or not a message is consecutive.)
 
 Its development involved many, many things that I've never used before (see [Learnings](#learnings) below for more details). 
 
