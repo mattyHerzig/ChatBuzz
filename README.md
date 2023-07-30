@@ -13,7 +13,6 @@ ChatBuzz is a simple OBS Plugin that displays repeated messages from a Twitch ch
 * [Future Features (if Warranted)](#future-features-if-warranted)
 * [Contributing](#contributing)
 * [License](#license)
-* <sub>[Secret](#give-a)</sub>
 
 ## URL Arguments
 Your OBS Browser Source URL should look like 'https://chatbuzz.app/?user=USERNAME', with USERNAME being replaced by your Twitch channel's username (case insensitive).
@@ -90,4 +89,4 @@ Any contributions are greatly appreciated.
 ## License
 Distributed under the MIT License, see `LICENSE` for more info.
 
-<sup id="give-a">Give a ⭐️ :)</sup>
+## <sub><sub><sub><sup>Give a ⭐️ :)</sup></sub></sub></sub>
