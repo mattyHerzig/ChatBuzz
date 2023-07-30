@@ -17,7 +17,7 @@ ChatBuzz is a simple OBS Plugin that displays repeated messages from a Twitch ch
 ## URL Arguments
 Your OBS Browser Source URL should look like 'https://chatbuzz.app/?user=USERNAME', with USERNAME being replaced by your Twitch channel's username (case insensitive).
 
-In addition, you can also add how ever many arguments to the end as you need, in any order, in the form '&ARG=PARAMETER'. For example, you may have 'https://chatbuzz.app/?user=xqc&tts=false&min=5&dur=10'
+In addition, you can also add how ever many arguments to the end as you need, in any order, in the form '&ARG=PARAMETER'. For example, you may have 'https://chatbuzz.app/?user=xqc&tts=false&min=5&dur=10.5'
 
 ### Table of Handled Arguments
 | Argument | Definition                                                           | Data Type | Constraints                  | Default Value |
