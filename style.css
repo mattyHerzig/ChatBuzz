@@ -25,6 +25,12 @@
   white-space: nowrap;
 }
 
+.error {
+  font-size: 20px;
+  color:rgb(228, 81, 81);
+  -webkit-text-stroke: 1px rgb(190, 73, 73);
+}
+
 .spawn_anim {
   animation-name: Spawn;
   animation-duration: 0.1s;
