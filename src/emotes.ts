@@ -1,11 +1,11 @@
-let globalEmoteCodeToId  : Map<string, string> = new Map();
-let channelEmoteCodeToId : Map<string, string> = new Map();
-let bttvEmoteCodeToId    : Map<string, string> = new Map();
-let ffzEmoteCodeToId     : Map<string, string> = new Map();
-let seventvEmoteCodeToId : Map<string, string> = new Map();
+let globalEmoteCodeToId  : Map<string, string>;
+let channelEmoteCodeToId : Map<string, string>;
+let bttvEmoteCodeToId    : Map<string, string>;
+let ffzEmoteCodeToId     : Map<string, string>;
+let seventvEmoteCodeToId : Map<string, string>;
 
 // Uses teklynk's https://github.com/teklynk/twitch_api_public
-export async function fetchEmotes(channel: string, bttvIncluded: boolean, ffzIncluded: boolean, seventvIncluded: boolean) {
+export async function fetchEmotes(channel: string, noBttv: boolean, noFfz: boolean, no7tv: boolean) {
   let response = await fetch('https://twitchapi.teklynk.com/getglobalemotes.php');
   let emotes = (await response.json())['data'];
   globalEmoteCodeToId = new Map(emotes.map((emote: any) => [emote['name'], emote['id']])); 
@@ -14,17 +14,17 @@ export async function fetchEmotes(channel: string, bttvIncluded: boolean, ffzInc
   emotes = (await response.json())['data'];
   channelEmoteCodeToId = new Map(emotes.map((emote: any) => [emote['name'], emote['id']])); 
 
-  if (bttvIncluded) {
+  if (!noBttv) {
     response = await fetch(`https://twitchapi.teklynk.com/getbttvemotes.php?channel=${channel}`);
     emotes = await response.json();
     bttvEmoteCodeToId = new Map(emotes.map((emote: any) => [emote['code'], emote['id']]));
   }
-  if (ffzIncluded) {
+  if (!noFfz) {
     response = await fetch(`https://twitchapi.teklynk.com/getffzemotes.php?channel=${channel}`);
     emotes = await response.json();
     ffzEmoteCodeToId = new Map(emotes.map((emote: any) => [emote['code'], emote['id']]));
   }
-  if (seventvIncluded) {
+  if (!no7tv) {
     response = await fetch(`https://twitchapi.teklynk.com/get7tvemotes.php?channel=${channel}`);
     emotes = await response.json();
     seventvEmoteCodeToId = new Map(emotes.map((emote: any) => [emote['code'], emote['id']]));

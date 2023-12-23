@@ -20,12 +20,12 @@ export function getURLParams() {
   let ttsVolume       = 0.5;      // vol
   let ttsRate         = 0.8;      // rate
   let ttsPitch        = 2.0;      // pitch
-  let isNoTts         = false;    // notts
+  let noTts           = false;    // notts
   let isTopDown       = false;    // topdown
   let isRightSide     = false;    // rightside
-  let bttvIncluded    = false;    // bttv
-  let ffzIncluded     = false;    // ffz
-  let seventvIncluded = false;    // 7tv
+  let noBttv          = false;    // noBttv
+  let noFfz           = false;    // noFfz
+  let no7tv           = false;    // no7tv
 
   // Parse URL parameters
   const urlParams = new URLSearchParams(window.location.search);
@@ -80,21 +80,12 @@ export function getURLParams() {
     if (!isNaN(ttsPitchParsed)) ttsPitch = ttsPitchParsed;
   }
 
-  isNoTts = urlParams.has('notts');
-
+  noTts = urlParams.has('notts');
   isTopDown = urlParams.has('topdown');
-
   isRightSide = urlParams.has('rightside');
-
-  if (urlParams.has('all')) {
-    bttvIncluded = true;
-    ffzIncluded = true;
-    seventvIncluded = true;
-  } else {
-    bttvIncluded = urlParams.has('bttv');
-    ffzIncluded = urlParams.has('ffz');
-    seventvIncluded = urlParams.has('7tv');
-  }
+  noBttv = urlParams.has('nobttv');
+  noFfz = urlParams.has('noffz');
+  no7tv = urlParams.has('no7tv');
 
   return {
     channel,
@@ -106,11 +97,11 @@ export function getURLParams() {
     ttsVolume,
     ttsRate,
     ttsPitch,
-    isNoTts,
+    noTts,
     isTopDown,
     isRightSide,
-    bttvIncluded,
-    ffzIncluded,
-    seventvIncluded,
+    noBttv,
+    noFfz,
+    no7tv,
   };
 }

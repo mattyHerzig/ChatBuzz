@@ -17,10 +17,8 @@ I've configured ChatBuzz so that its width and height are the same as the OBS Br
 
 Your OBS Browser Source URL should look like 'https://chatbuzz.app/?channel=CHANNEL', with CHANNEL being replaced by your Twitch channel's username (case insensitive). In addition, you can also add how ever many arguments to the end as you need, in any order, in the form '&PARAMETER=ARGUMENT'. For example, you may have "https://chatbuzz.app/?channel=xqc&notts&min=5&dur=10.5&color=red".
 
-I can add new parameters in the future if needed, such as animation speed.
-
 ### Table of Parameters
-| Parameter | Definition                                                                                                                                    | Data Type | Constraints                                                | Default Value |
+|           | Definition                                                                                                                                    | Data Type | Constraints                                                | Default Value |
 |-----------|-----------------------------------------------------------------------------------------------------------------------------------------------|-----------|------------------------------------------------------------|---------------|
 | channel   | Channel username                                                                                                                              | string    | -                                                          | -             |
 | color     | Repeat font color                                                                                                                             | string    | pink \| red \| orange \| yellow \| green \| blue \| purple | yellow        |
@@ -34,15 +32,14 @@ I can add new parameters in the future if needed, such as animation speed.
 | notts     | No Text-To-Speech                                                                                                                             | bool*     | N/A                                                        | false         |
 | topdown   | Top-down instead of bottom-up                                                                                                                 | bool*     | N/A                                                        | false         |
 | rightside | Right-side instead of left-side                                                                                                               | bool*     | N/A                                                        | false         |
-| all       | Include BetterTTV, FrankerFaceZ, and 7TV emotes                                                                                               | bool*     | N/A                                                        | false         |
-| bttv      | Include BetterTTV emotes                                                                                                                      | bool*     | N/A                                                        | false         |
-| ffz       | Include FrankerFaceZ emotes                                                                                                                   | bool*     | N/A                                                        | false         |
-| 7tv       | Include 7TV emotes                                                                                                                            | bool*     | N/A                                                        | false         |
+| nobttv    | Exclude BetterTTV emotes                                                                                                                      | bool*     | N/A                                                        | false         |
+| noffz     | Exclude FrankerFaceZ emotes                                                                                                                   | bool*     | N/A                                                        | false         |
+| no7tv     | Exclude 7TV emotes                                                                                                                            | bool*     | N/A                                                        | false         |
 
-\* the bool paremeters, notts–7tv, may be false on default, but I've made it so you don't need to provide "true" for it to be true. Simply include it as an argument e.g. "&topdown&all" rather than "&topdown=true&all=true".
+\* the bool paremeters, notts–7tv, may be false on default, but I've made it so you don't need to provide "true" for it to be true. Simply include it as an argument e.g. "&topdown&notts" rather than "&topdown=true&notts=true".
 
 ### TTS Bug
-The voice synthesis used by most web browsers, SpeechSynthesis, has issues with OBS as seen [here](https://github.com/obsproject/obs-browser/issues/404). Because of this, you have to uncheck the browser source property box "Control audio via OBS" to hear the audio, and unfortunately the audio might play when you're in other scenes. The current workaround is to temporarily delete the ChatBuzz browser source when needed. In the future, I may explore different TTS processes such as an API or a local program.
+The voice synthesis used by most web browsers, SpeechSynthesis, has issues with OBS as seen [here](https://github.com/obsproject/obs-browser/issues/404). Because of this, you have to uncheck the browser source property box "Control audio via OBS" to hear the audio, and unfortunately the audio might play when you're in other scenes. The current workaround is to temporarily add the notts parameter or to delete the ChatBuzz browser source when needed. In the future, I may explore different TTS processes such as an API or a local program.
 
 ## About
 ChatBuzz is the first personal project that I can be genuinely be proud of. The need to create it came about when I wanted to personally use an OBS Plugin with a certain functionality while streaming on Twitch, but I couldn't find any that fit my needs. Specifically, the Twitch streamer Charborg has a similar program that was developed by Cagelight, seen [here](https://www.youtube.com/watch?v=pFehqYehbUA). I took it upon myself to make a free, open-source, public version.
