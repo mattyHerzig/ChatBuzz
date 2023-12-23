@@ -2,9 +2,9 @@ const path = require('path');
 
 module.exports = {
   mode: 'production',
-  entry: './chatbuzz.ts',
+  entry: './src/main.ts',
   output: {
-    path: path.resolve(__dirname, './'),
+    path: path.resolve(__dirname, './dist/'),
     filename: 'bundle.js',
   },
   module: {
@@ -15,5 +15,8 @@ module.exports = {
         exclude: /node_modules/,
       },
     ],
+  },
+  resolve: {
+    extensions: ['.ts', '.js'],
   },
 };

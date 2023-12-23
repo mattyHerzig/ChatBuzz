@@ -1,0 +1,86 @@
+@font-face {
+  font-family: 'Retro Gaming';
+  src: url('../assets/Retro Gaming.ttf');
+  font-display: block;
+}
+
+:root {
+  --animation-duration-short: 0.1s;
+  --animation-duration-long: 0.2s;
+  
+  /* Set by parameters, these are the default values */
+  --color: rgb(226, 226, 66);
+  --flex-direction: column-reverse;
+  --align-items: flex-start;
+  --font-size: 30px;
+}
+
+#space {
+  /* border-style: solid; */
+  /* overflow: hidden; */
+  box-sizing: border-box;
+  width: 800px;
+  height: 600px;
+  top: 0;
+  left: 0;
+  padding: 40px;
+  position: absolute;
+  display: flex;
+  justify-content: flex-start;
+  align-items: var(--align-items);
+  flex-direction: var(--flex-direction);
+  color: var(--color);
+  font-family: 'Retro Gaming';
+  -webkit-text-stroke: 1px rgb(0, 0, 0);
+  font-size: var(--font-size);
+}
+
+.repeat_wrapper {
+  /* border-style: solid; */
+  margin: 2px;
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  flex-direction: row;
+}
+
+.message {
+  display: flex;
+  align-items: flex-end;
+  flex-direction: row;
+}
+
+.count {
+  color: white;
+}
+
+.spawn_anim {
+  animation-name: Spawn;
+  animation-duration: var(--animation-duration-short);
+  transform-origin: center;
+} @keyframes Spawn {
+  0% {transform: scale(0.5);}
+}
+
+.pop_anim {
+  animation-name: Pop;
+  animation-duration: var(--animation-duration-long);
+  transform-origin: center;
+} @keyframes Pop {
+  50% {transform: scale(1.2);}
+}
+
+.count_pop_anim {
+  animation-name: CountPop;
+  animation-duration: var(--animation-duration-long);
+} @keyframes CountPop {
+  50% {color: var(--color);}
+}
+
+.shrink_anim {
+  animation-name: Shrink;
+  animation-duration: var(--animation-duration-short);
+  transform-origin: center;
+} @keyframes Shrink {
+  100% {transform: scale(0.5);}
+}
