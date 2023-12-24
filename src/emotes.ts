@@ -31,13 +31,13 @@ export async function fetchEmotes(channel: string, noBttv: boolean, noFfz: boole
 
 function getEmoteImageUrl(word: string) {
   let id = twitchEmoteCodeToId.get(word);
-  if (id) return `https://static-cdn.jtvnw.net/emoticons/v2/${id}/default/dark/1.0`
+  if (id) return `https://static-cdn.jtvnw.net/emoticons/v2/${id}/default/dark/3.0`
   id = bttvEmoteCodeToId.get(word);
-  if (id) return `https://cdn.betterttv.net/emote/${id}/1x`;
+  if (id) return `https://cdn.betterttv.net/emote/${id}/3x`;
   id = ffzEmoteCodeToId.get(word);
-  if (id) return `https://cdn.frankerfacez.com/emote/${id}/1`;
+  if (id) return `https://cdn.frankerfacez.com/emote/${id}/4`;
   id = seventvEmoteCodeToId.get(word);
-  if (id) return `https://cdn.7tv.app/emote/${id}/1x.webp`
+  if (id) return `https://cdn.7tv.app/emote/${id}/4x.webp`
   return null;
 }
 
