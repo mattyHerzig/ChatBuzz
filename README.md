@@ -8,7 +8,7 @@ ChatBuzz is a simple OBS Plugin that displays repeated messages from a Twitch ch
 * [Setup & Demo (click)](#setup--demo-click)
 * [URL Parameters](#url-parameters)
   * [Table of Parameters](#table-of-parameters)
-  * [TTS Bug](#tts-bug)
+  * [Text-To-Speech Bug](#text-to-speech-bug)
 * [About](#about)
   * [Learnings](#learnings)
 
