@@ -50,7 +50,7 @@ ChatBuzz is the first personal project that I can be genuinely be proud of. The 
 
 (There exists a similar, widespread OBS Plugin concept of the "Combo". However, this is differentiated from a "Repeat", in that it checks when consecutive messages are identical, whereas, for a Repeat, I used a time duration which ignores whether or not a message is consecutive.)
 
-I appreciate any and all feedback! Have you encountered any issues? Do you want new features e.g. emote-only mode, different font options? Any reccomendations? Etc. Thanks for reading!
+I appreciate any and all feedback! Have you encountered any issues? Do you want new features e.g. emote-only mode, different font options? Any recommendations? Etc. Thanks for reading!
 
 ### Learnings
 - TypeScript (& JavaScript)
