@@ -10,17 +10,20 @@
   
   /* Set by parameters, these are the default values */
   --color: rgb(226, 226, 66);
+  --width: 800px;
+  --height: 600px;
   --flex-direction: column-reverse;
   --align-items: flex-start;
   --font-size: 30px;
+  --height-multiplier: 1;
   --border-style: none;
 }
 
 #space {
   border-style: var(--border-style);
   box-sizing: border-box;
-  width: 800px;
-  height: 600px;
+  width: var(--width);
+  height: var(--height);
   top: 0;
   left: 0;
   padding: 40px;
@@ -49,6 +52,12 @@
   display: flex;
   align-items: flex-end;
   flex-direction: row;
+}
+
+.emote {
+  border-style: var(--border-style);
+  height: calc(var(--font-size) * var(--height-multiplier));
+  width: auto;
 }
 
 .count {

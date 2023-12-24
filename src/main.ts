@@ -8,13 +8,15 @@ const {
   channel,
   color,
   fontSize,
-  emoteSize,
   minRepeatCount,
   repeatDuration,
+  windowWidth,
+  windowHeight,
   ttsVolume,
   ttsRate,
   ttsPitch,
   noTts,
+  bigEmotes,
   isTopDown,
   isRightSide,
   noBttv,
@@ -24,8 +26,11 @@ const {
 } = getURLParams();
 
 document.documentElement.style.setProperty('--color', colorToRgb[color]);
+document.documentElement.style.setProperty('--width', windowWidth.toString() + 'px');
+document.documentElement.style.setProperty('--height', windowHeight.toString() + 'px');
 document.documentElement.style.setProperty('--flex-direction', isTopDown ? 'column' : 'column-reverse');
 document.documentElement.style.setProperty('--font-size', fontSize.toString() + 'px');
+document.documentElement.style.setProperty('--height-multiplier', bigEmotes ? '1.5' : '1.2');
 document.documentElement.style.setProperty('--align-items', isRightSide ? 'flex-end' : 'flex-start');
 document.documentElement.style.setProperty('--border-style', debugMode ? 'solid' : 'none');
 
@@ -44,19 +49,6 @@ interface RepeatData {
   element: Element | null;
 }
 const activeRepeats: Map<string, RepeatData> = new Map();
-
-
-
-function speak(message: string) {
-  if (noTts) return;
-  const utterance = new SpeechSynthesisUtterance(message);
-  utterance.volume = ttsVolume;
-  utterance.rate = ttsRate;
-  utterance.pitch = ttsPitch;
-  speechSynthesis.speak(utterance);
-}
-
-
 
 const client = new tmi.Client({channels: [channel], connection: {reconnect: true}});
 client.connect();
@@ -94,7 +86,7 @@ function handleRepeatedMessage(message: string, repeatData: RepeatData) {
   if (repeatData.count >= minRepeatCount) {
     let countElement: HTMLSpanElement;
     if (repeatData.element == null) {
-      const messageElement = insertEmotes(message, emoteSize);
+      const messageElement = insertEmotes(message);
       countElement = document.createElement('span');
       countElement.className = 'count';
       // Don't need a space before the 'x', added in insertEmotes()
@@ -122,4 +114,13 @@ function handleRepeatedMessage(message: string, repeatData: RepeatData) {
     // Replacing the element with itself updates the repeatData's element
     spaceElement.replaceChild(repeatData.element, repeatData.element);
   }
+}
+
+function speak(message: string) {
+  if (noTts) return;
+  const utterance = new SpeechSynthesisUtterance(message);
+  utterance.volume = ttsVolume;
+  utterance.rate = ttsRate;
+  utterance.pitch = ttsPitch;
+  speechSynthesis.speak(utterance);
 }

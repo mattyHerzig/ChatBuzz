@@ -9,18 +9,20 @@ export const colorToRgb: Record<string, string> = {
 };
 
 export function getURLParams() {
-    
+  
   // Initialize parameters as default values
   let channel: string | null;     // channel
   let color           = 'yellow'; // color
   let fontSize        = 30.0;     // fontsize
-  let emoteSize       = 2;        // emotesize 
   let minRepeatCount  = 3;        // min
   let repeatDuration  = 7.0;      // dur
+  let windowWidth     = 800;      // width
+  let windowHeight    = 600;      // height
   let ttsVolume       = 0.5;      // vol
   let ttsRate         = 0.8;      // rate
   let ttsPitch        = 2.0;      // pitch
   let noTts           = false;    // notts
+  let bigEmotes       = false;    // bigemotes
   let isTopDown       = false;    // topdown
   let isRightSide     = false;    // rightside
   let noBttv          = false;    // noBttv
@@ -45,12 +47,6 @@ export function getURLParams() {
     if (!isNaN(fontSizeParsed) && fontSizeParsed > 0) fontSize = fontSizeParsed;
   }
 
-  const emoteSizeStr = urlParams.get('emotesize');
-  if (emoteSizeStr) {
-    const emoteSizeParsed = parseInt(emoteSizeStr);
-    if (emoteSizeParsed >= 1 && emoteSizeParsed <= 3) emoteSize = emoteSizeParsed;
-  }
-
   const minRepeatCountStr = urlParams.get('min');
   if (minRepeatCountStr) {
     const minRepeatCountParsed = parseInt(minRepeatCountStr);
@@ -61,6 +57,18 @@ export function getURLParams() {
   if (repeatDurationStr) {
     const repeatDurationParsed = parseFloat(repeatDurationStr);
     if (!isNaN(repeatDurationParsed) && repeatDurationParsed > 0) repeatDuration = repeatDurationParsed;
+  }
+
+  const windowWidthStr = urlParams.get('width');
+  if (windowWidthStr) {
+    const windowWidthParsed = parseInt(windowWidthStr);
+    if (windowWidthParsed > 0) windowWidth = windowWidthParsed;
+  }
+
+  const windowHeightStr = urlParams.get('height');
+  if (windowHeightStr) {
+    const windowHeightParsed = parseInt(windowHeightStr);
+    if (windowHeightParsed > 0) windowHeight = windowHeightParsed;
   }
 
   const ttsVolumeStr = urlParams.get('vol');
@@ -81,25 +89,28 @@ export function getURLParams() {
     if (!isNaN(ttsPitchParsed)) ttsPitch = ttsPitchParsed;
   }
 
-  noTts = urlParams.has('notts');
-  isTopDown = urlParams.has('topdown');
-  isRightSide = urlParams.has('rightside');
-  noBttv = urlParams.has('nobttv');
-  noFfz = urlParams.has('noffz');
-  no7tv = urlParams.has('no7tv');
-  debugMode = urlParams.has('debug');
+  noTts       = urlParams.has('notts')     && urlParams.get('notts')     !== 'false';
+  bigEmotes   = urlParams.has('bigemotes') && urlParams.get('bigemotes') !== 'false';
+  isTopDown   = urlParams.has('topdown')   && urlParams.get('topdown')   !== 'false';
+  isRightSide = urlParams.has('rightside') && urlParams.get('rightside') !== 'false';
+  noBttv      = urlParams.has('nobttv')    && urlParams.get('nobttv')    !== 'false';
+  noFfz       = urlParams.has('noffz')     && urlParams.get('noffz')     !== 'false';
+  no7tv       = urlParams.has('no7tv')     && urlParams.get('no7tv')     !== 'false';
+  debugMode   = urlParams.has('debug')     && urlParams.get('debug')     !== 'false';
 
   return {
     channel,
     color,
     fontSize,
-    emoteSize,
     minRepeatCount,
     repeatDuration,
+    windowWidth,
+    windowHeight,
     ttsVolume,
     ttsRate,
     ttsPitch,
     noTts,
+    bigEmotes,
     isTopDown,
     isRightSide,
     noBttv,

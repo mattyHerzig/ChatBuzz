@@ -29,35 +29,36 @@ export async function fetchEmotes(channel: string, noBttv: boolean, noFfz: boole
   if (debugMode) console.log('twitchEmoteCodeToId', twitchEmoteCodeToId, 'bttvEmoteCodeToId', bttvEmoteCodeToId, 'ffzEmoteCodeToId', ffzEmoteCodeToId, 'seventvEmoteCodeToId', seventvEmoteCodeToId);
 }
 
-function getEmoteImageUrl(word: string, emoteSize: number) {
+function getEmoteImageUrl(word: string) {
   let id = twitchEmoteCodeToId.get(word);
-  if (id) return `https://static-cdn.jtvnw.net/emoticons/v2/${id}/default/dark/${emoteSize}.0`
+  if (id) return `https://static-cdn.jtvnw.net/emoticons/v2/${id}/default/dark/1.0`
   id = bttvEmoteCodeToId.get(word);
-  if (id) return `https://cdn.betterttv.net/emote/${id}/${emoteSize}x`;
+  if (id) return `https://cdn.betterttv.net/emote/${id}/1x`;
   id = ffzEmoteCodeToId.get(word);
-  if (id) return `https://cdn.frankerfacez.com/emote/${id}/${emoteSize}`;
+  if (id) return `https://cdn.frankerfacez.com/emote/${id}/1`;
   id = seventvEmoteCodeToId.get(word);
-  if (id) return `https://cdn.7tv.app/emote/${id}/${emoteSize}x.webp`
+  if (id) return `https://cdn.7tv.app/emote/${id}/1x.webp`
   return null;
 }
 
-export function insertEmotes(message: string, emoteSize: number) : HTMLSpanElement { 
+export function insertEmotes(message: string) : HTMLSpanElement { 
   let messageElement = document.createElement('span');
   messageElement.className = 'message';
   let words = message.split(' ');
   words.forEach((word, index) => {
-    const emoteImageUrl = getEmoteImageUrl(word, emoteSize);
+    const emoteImageUrl = getEmoteImageUrl(word);
     if (emoteImageUrl) {
       let emoteElement = document.createElement('img');
       emoteElement.src = emoteImageUrl;
+      emoteElement.className = 'emote';
       messageElement.appendChild(emoteElement);
     } else {
       let textNode = document.createTextNode(word);
       messageElement.appendChild(textNode);
     }
-    let spaceNode = document.createElement('span');
-    spaceNode.innerHTML = '&nbsp;';
-    messageElement.appendChild(spaceNode);
+    let spaceElement = document.createElement('span');
+    spaceElement.innerHTML = '&nbsp;';
+    messageElement.appendChild(spaceElement);
   });
   return messageElement;
 }
