@@ -13,11 +13,11 @@
   --flex-direction: column-reverse;
   --align-items: flex-start;
   --font-size: 30px;
+  --border-style: none;
 }
 
 #space {
-  /* border-style: solid; */
-  /* overflow: hidden; */
+  border-style: var(--border-style);
   box-sizing: border-box;
   width: 800px;
   height: 600px;
@@ -36,7 +36,7 @@
 }
 
 .repeat_wrapper {
-  /* border-style: solid; */
+  border-style: var(--border-style);
   margin: 2px;
   position: relative;
   display: flex;
@@ -45,12 +45,14 @@
 }
 
 .message {
+  border-style: var(--border-style);
   display: flex;
   align-items: flex-end;
   flex-direction: row;
 }
 
 .count {
+  border-style: var(--border-style);
   color: white;
 }
 

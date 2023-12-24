@@ -27,6 +27,7 @@ document.documentElement.style.setProperty('--color', colorToRgb[color]);
 document.documentElement.style.setProperty('--flex-direction', isTopDown ? 'column' : 'column-reverse');
 document.documentElement.style.setProperty('--font-size', fontSize.toString() + 'px');
 document.documentElement.style.setProperty('--align-items', isRightSide ? 'flex-end' : 'flex-start');
+document.documentElement.style.setProperty('--border-style', debugMode ? 'solid' : 'none');
 
 const spaceElement = document.getElementById('space')!;  
 
