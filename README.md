@@ -42,7 +42,7 @@ Your OBS Browser Source URL should look like 'https://chatbuzz.app/?channel=CHAN
 
 \* the bool paremeters, notts–7tv, may be false on default, but I've made it so you don't need to provide "true" for it to be true. Simply include it as an argument e.g. "&topdown&notts" rather than "&topdown=true&notts=true".
 
-### TTS Bug
+### Text-To-Speech Bug
 The voice synthesis used by most web browsers, SpeechSynthesis, has issues with OBS as seen [here](https://github.com/obsproject/obs-browser/issues/404). Because of this, you have to uncheck the browser source property box "Control audio via OBS" to hear the audio, and unfortunately the audio might play when you're in other scenes. The current workaround is to temporarily add the notts parameter or to delete the ChatBuzz browser source when needed. In the future, I may explore different TTS processes such as an API or a local program.
 
 ## About
