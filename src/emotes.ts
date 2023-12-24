@@ -26,7 +26,7 @@ export async function fetchEmotes(channel: string, noBttv: boolean, noFfz: boole
     emotes = await response.json();
     seventvEmoteCodeToId = new Map(emotes.map((emote: any) => [emote['code'], emote['id']]));
   }
-  if (debugMode) console.log(twitchEmoteCodeToId, bttvEmoteCodeToId, ffzEmoteCodeToId, seventvEmoteCodeToId);
+  if (debugMode) console.log('twitchEmoteCodeToId', twitchEmoteCodeToId, 'bttvEmoteCodeToId', bttvEmoteCodeToId, 'ffzEmoteCodeToId', ffzEmoteCodeToId, 'seventvEmoteCodeToId', seventvEmoteCodeToId);
 }
 
 function getEmoteImageUrl(word: string, emoteSize: number) {
