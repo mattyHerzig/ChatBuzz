@@ -10,12 +10,12 @@
   
   /* Set by parameters, these are the default values */
   --color: rgb(226, 226, 66);
+  --font-size: 30px;
+  --emote-scale: 1.3;
   --width: 800px;
   --height: 600px;
   --flex-direction: column-reverse;
   --align-items: flex-start;
-  --font-size: 30px;
-  --height-multiplier: 1;
   --border-style: none;
 }
 
@@ -56,7 +56,7 @@
 
 .emote {
   border-style: var(--border-style);
-  height: calc(var(--font-size) * var(--height-multiplier));
+  height: calc(var(--font-size) * var(--emote-scale));
   width: auto;
 }
 

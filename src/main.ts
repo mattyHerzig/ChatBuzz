@@ -8,6 +8,7 @@ const {
   channel,
   color,
   fontSize,
+  emoteScale,
   minRepeatCount,
   repeatDuration,
   windowWidth,
@@ -16,7 +17,7 @@ const {
   ttsRate,
   ttsPitch,
   noTts,
-  bigEmotes,
+  noRepeating,
   isTopDown,
   isRightSide,
   noBttv,
@@ -26,11 +27,11 @@ const {
 } = getURLParams();
 
 document.documentElement.style.setProperty('--color', colorToRgb[color]);
+document.documentElement.style.setProperty('--font-size', fontSize.toString() + 'px');
+document.documentElement.style.setProperty('--emote-scale', emoteScale.toString());
 document.documentElement.style.setProperty('--width', windowWidth.toString() + 'px');
 document.documentElement.style.setProperty('--height', windowHeight.toString() + 'px');
 document.documentElement.style.setProperty('--flex-direction', isTopDown ? 'column' : 'column-reverse');
-document.documentElement.style.setProperty('--font-size', fontSize.toString() + 'px');
-document.documentElement.style.setProperty('--height-multiplier', bigEmotes ? '1.5' : '1.2');
 document.documentElement.style.setProperty('--align-items', isRightSide ? 'flex-end' : 'flex-start');
 document.documentElement.style.setProperty('--border-style', debugMode ? 'solid' : 'none');
 
@@ -105,7 +106,7 @@ function handleRepeatedMessage(message: string, repeatData: RepeatData) {
       countElement = repeatData.element.children[1] as HTMLSpanElement;
       // Same as above, "don't need a space before the 'x'..."
       countElement.textContent = 'x' + repeatData.count.toString();
-      if (repeatData.count % minRepeatCount == 0) speak(message);
+      if (!noRepeating && repeatData.count % minRepeatCount == 0) speak(message);
     }
     repeatData.element.classList.remove('pop_anim');
     countElement.classList.remove('count_pop_anim');

@@ -14,6 +14,7 @@ export function getURLParams() {
   let channel: string | null;     // channel
   let color           = 'yellow'; // color
   let fontSize        = 30.0;     // fontsize
+  let emoteScale      = 1.3;      // emotescale
   let minRepeatCount  = 3;        // min
   let repeatDuration  = 7.0;      // dur
   let windowWidth     = 800;      // width
@@ -22,7 +23,7 @@ export function getURLParams() {
   let ttsRate         = 0.8;      // rate
   let ttsPitch        = 2.0;      // pitch
   let noTts           = false;    // notts
-  let bigEmotes       = false;    // bigemotes
+  let noRepeating     = false;    // norepeat
   let isTopDown       = false;    // topdown
   let isRightSide     = false;    // rightside
   let noBttv          = false;    // noBttv
@@ -45,6 +46,12 @@ export function getURLParams() {
   if (fontSizeStr) {
     const fontSizeParsed = parseFloat(fontSizeStr);
     if (!isNaN(fontSizeParsed) && fontSizeParsed > 0) fontSize = fontSizeParsed;
+  }
+
+  const emoteScaleStr = urlParams.get('emotescale');
+  if (emoteScaleStr) {
+    const emoteScaleParsed = parseFloat(emoteScaleStr);
+    if (!isNaN(emoteScaleParsed) && emoteScaleParsed > 0) emoteScale = emoteScaleParsed;
   }
 
   const minRepeatCountStr = urlParams.get('min');
@@ -90,7 +97,7 @@ export function getURLParams() {
   }
 
   noTts       = urlParams.has('notts')     && urlParams.get('notts')     !== 'false';
-  bigEmotes   = urlParams.has('bigemotes') && urlParams.get('bigemotes') !== 'false';
+  noRepeating = urlParams.has('norepeat')  && urlParams.get('norepeat')  !== 'false';
   isTopDown   = urlParams.has('topdown')   && urlParams.get('topdown')   !== 'false';
   isRightSide = urlParams.has('rightside') && urlParams.get('rightside') !== 'false';
   noBttv      = urlParams.has('nobttv')    && urlParams.get('nobttv')    !== 'false';
@@ -102,6 +109,7 @@ export function getURLParams() {
     channel,
     color,
     fontSize,
+    emoteScale,
     minRepeatCount,
     repeatDuration,
     windowWidth,
@@ -110,7 +118,7 @@ export function getURLParams() {
     ttsRate,
     ttsPitch,
     noTts,
-    bigEmotes,
+    noRepeating,
     isTopDown,
     isRightSide,
     noBttv,
