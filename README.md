@@ -2,7 +2,7 @@
 ChatBuzz is a simple OBS Plugin that displays repeated messages from a Twitch chat.
 
 ## Setup & Demo (click)
-[![Setup & Demo Video](https://img.youtube.com/vi/H00uMktz4qo/0.jpg)](https://youtu.be/H00uMktz4qo "ChatBuzz Setup & Demo")
+[![Setup & Demo Video](https://img.youtube.com/vi/h4NHr8qFQfI/0.jpg)](https://youtu.be/h4NHr8qFQfI "ChatBuzz Setup & Demo")
 
 ## Table of Contents
 * [Setup & Demo (click)](#setup--demo-click)
