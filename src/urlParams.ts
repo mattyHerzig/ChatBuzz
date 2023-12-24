@@ -26,6 +26,7 @@ export function getURLParams() {
   let noBttv          = false;    // noBttv
   let noFfz           = false;    // noFfz
   let no7tv           = false;    // no7tv
+  let debugMode       = false;    // debug
 
   // Parse URL parameters
   const urlParams = new URLSearchParams(window.location.search);
@@ -86,6 +87,7 @@ export function getURLParams() {
   noBttv = urlParams.has('nobttv');
   noFfz = urlParams.has('noffz');
   no7tv = urlParams.has('no7tv');
+  debugMode = urlParams.has('debug');
 
   return {
     channel,
@@ -103,5 +105,6 @@ export function getURLParams() {
     noBttv,
     noFfz,
     no7tv,
+    debugMode,
   };
 }

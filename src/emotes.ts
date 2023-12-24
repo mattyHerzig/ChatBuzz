@@ -1,19 +1,16 @@
-let globalEmoteCodeToId  : Map<string, string>;
-let channelEmoteCodeToId : Map<string, string>;
+let twitchEmoteCodeToId  : Map<string, string>;
 let bttvEmoteCodeToId    : Map<string, string>;
 let ffzEmoteCodeToId     : Map<string, string>;
 let seventvEmoteCodeToId : Map<string, string>;
 
 // Uses teklynk's https://github.com/teklynk/twitch_api_public
-export async function fetchEmotes(channel: string, noBttv: boolean, noFfz: boolean, no7tv: boolean) {
+export async function fetchEmotes(channel: string, noBttv: boolean, noFfz: boolean, no7tv: boolean, debugMode: boolean) {
   let response = await fetch('https://twitchapi.teklynk.com/getglobalemotes.php');
   let emotes = (await response.json())['data'];
-  globalEmoteCodeToId = new Map(emotes.map((emote: any) => [emote['name'], emote['id']])); 
-  
+  twitchEmoteCodeToId = new Map(emotes.map((emote: any) => [emote['name'], emote['id']])); 
   response = await fetch(`https://twitchapi.teklynk.com/getuseremotes.php?channel=${channel}`);
   emotes = (await response.json())['data'];
-  channelEmoteCodeToId = new Map(emotes.map((emote: any) => [emote['name'], emote['id']])); 
-
+  emotes.forEach((emote: any) => twitchEmoteCodeToId.set(emote['name'], emote['id']));
   if (!noBttv) {
     response = await fetch(`https://twitchapi.teklynk.com/getbttvemotes.php?channel=${channel}`);
     emotes = await response.json();
@@ -29,12 +26,11 @@ export async function fetchEmotes(channel: string, noBttv: boolean, noFfz: boole
     emotes = await response.json();
     seventvEmoteCodeToId = new Map(emotes.map((emote: any) => [emote['code'], emote['id']]));
   }
+  if (debugMode) console.log(twitchEmoteCodeToId, bttvEmoteCodeToId, ffzEmoteCodeToId, seventvEmoteCodeToId);
 }
 
 function getEmoteImageUrl(word: string, emoteSize: number) {
-  let id = globalEmoteCodeToId.get(word);
-  if (id) return `https://static-cdn.jtvnw.net/emoticons/v2/${id}/default/dark/${emoteSize}.0`
-  id = channelEmoteCodeToId.get(word);
+  let id = twitchEmoteCodeToId.get(word);
   if (id) return `https://static-cdn.jtvnw.net/emoticons/v2/${id}/default/dark/${emoteSize}.0`
   id = bttvEmoteCodeToId.get(word);
   if (id) return `https://cdn.betterttv.net/emote/${id}/${emoteSize}x`;

@@ -20,6 +20,7 @@ const {
   noBttv,
   noFfz,
   no7tv,
+  debugMode,
 } = getURLParams();
 
 document.documentElement.style.setProperty('--color', colorToRgb[color]);
@@ -59,7 +60,7 @@ function speak(message: string) {
 const client = new tmi.Client({channels: [channel], connection: {reconnect: true}});
 client.connect();
 
-fetchEmotes(channel, noBttv, noFfz, no7tv);
+fetchEmotes(channel, noBttv, noFfz, no7tv, debugMode);
 
 function restartTimeout(message: string) {
   const repeatData = activeRepeats.get(message)!;
