@@ -15,7 +15,7 @@ ChatBuzz is a simple OBS Plugin that displays repeated messages from a Twitch ch
 ## URL Parameters
 I've configured ChatBuzz so that its width and height are the same as the OBS Browser Source's default, 800x600. Because of this, it's as simple as putting in the URL and clicking "OK".
 
-Your OBS Browser Source URL should look like 'https://chatbuzz.app/?channel=CHANNEL', with CHANNEL being replaced by your Twitch channel's username (case insensitive). In addition, you can also add how ever many arguments to the end as you need, in any order, in the form '&PARAMETER=ARGUMENT'. For example, you may have "https://chatbuzz.app/?channel=xqc&notts&min=5&dur=10.5&color=red".
+Your OBS Browser Source URL should look like "https://chatbuzz.app/?channel=CHANNEL", with CHANNEL being replaced by your Twitch channel's username (case insensitive). In addition, you can also add how ever many arguments to the end as you need, in any order, in the form '&PARAMETER=ARGUMENT'. For example, you may have "https://chatbuzz.app/?channel=xqc&notts&min=5&dur=10.5&color=red".
 
 ### Table of Parameters
 | Parameter  | Definition                                                                                                                                    | Data Type | Constraints                                                | Default Value |
