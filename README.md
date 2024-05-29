@@ -48,7 +48,7 @@ The voice synthesis used by most web browsers, SpeechSynthesis, has issues with 
 ## About
 ChatBuzz is the first personal project that I can be genuinely be proud of. The need to create it came about when I wanted to personally use an OBS Plugin with a certain functionality while streaming on Twitch, but I couldn't find any that fit my needs. Specifically, the Twitch streamer Charborg has a similar program that was developed by Cagelight, seen [here](https://www.youtube.com/watch?v=pFehqYehbUA). I took it upon myself to make a free, open-source, public version.
 
-(There exists a similar, widespread OBS Plugin concept of the "Combo". However, this is differentiated from a "Repeat", in that it checks when consecutive messages are identical, whereas, for a Repeat, I used a time duration which ignores whether or not a message is consecutive.)
+(There exists a similar, widespread OBS Plugin concept of the "Combo" which is the number of consecutive identical messages. This is differentiated as a "Repeat", and uses a time duration which ignores whether or not messages are consecutive.)
 
 ### Learnings
 - TypeScript (& JavaScript)
