@@ -13,23 +13,29 @@ export async function fetchEmotes(channel: string, noBttv: boolean, noFfz: boole
   emotes.forEach((emote: any) => twitchEmoteCodeToId.set(emote['name'], emote['id']));
   if (!noBttv) {
     response = await fetch(`https://twitchapi.teklynk.com/getbttvemotes.php?channel=${channel}`);
-    emotes = await response.json();
-    if (Array.isArray(emotes)) {
+    if (response.ok) {
+      emotes = await response.json();
       bttvEmoteCodeToId = new Map(emotes.map((emote: any) => [emote['code'], emote['id']]));
     }
   }
   if (!noFfz) {
     response = await fetch(`https://twitchapi.teklynk.com/getffzemotes.php?channel=${channel}`);
-    emotes = await response.json();
-    if (Array.isArray(emotes)) {
+    if (response.ok) {
+      emotes = await response.json();
       ffzEmoteCodeToId = new Map(emotes.map((emote: any) => [emote['code'], emote['id']]));
     }
   }
   if (!no7tv) {
     response = await fetch(`https://twitchapi.teklynk.com/get7tvemotes.php?channel=${channel}`);
-    emotes = await response.json();
-    if (Array.isArray(emotes)) {
-      seventvEmoteCodeToId = new Map(emotes.map((emote: any) => [emote['code'], emote['id']]));
+    if (response.ok) {
+      let responseJson = (await response.json());
+      emotes = responseJson['emotes'];
+      seventvEmoteCodeToId = new Map(emotes.map((emote: any) => [emote['name'], emote['id']]));
+      // 'emote_set' may only contain a subset of all 'emote_sets', can implement this later if needed
+      let emoteSetEmotes = responseJson['emote_set']['emotes'];
+      for (let emoteSetEmote of emoteSetEmotes) {
+        seventvEmoteCodeToId.set(emoteSetEmote['name'], emoteSetEmote['id']);
+      }
     }
   }
   if (debugMode) {

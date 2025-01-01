@@ -63,7 +63,7 @@ function restartTimeout(message: string) {
     if (repeatData.element != null) {
       repeatData.element.classList.add('shrink_anim');
       repeatData.element.addEventListener('animationend', (event) => {
-        spaceElement.removeChild(repeatData.element!);
+        repeatData.element!.remove(); // spaceElement.removeChild(repeatData.element!);
       });
     }
     activeRepeats.delete(message);
