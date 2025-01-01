@@ -1,7 +1,7 @@
-let twitchEmoteCodeToId  : Map<string, string>;
-let bttvEmoteCodeToId    : Map<string, string>;
-let ffzEmoteCodeToId     : Map<string, string>;
-let seventvEmoteCodeToId : Map<string, string>;
+let twitchEmoteCodeToId  : Map<string, string> = new Map();
+let bttvEmoteCodeToId    : Map<string, string> = new Map();
+let ffzEmoteCodeToId     : Map<string, string> = new Map();
+let seventvEmoteCodeToId : Map<string, string> = new Map();
 
 // Uses teklynk's https://github.com/teklynk/twitch_api_public
 export async function fetchEmotes(channel: string, noBttv: boolean, noFfz: boolean, no7tv: boolean, debugMode: boolean) {
@@ -14,19 +14,27 @@ export async function fetchEmotes(channel: string, noBttv: boolean, noFfz: boole
   if (!noBttv) {
     response = await fetch(`https://twitchapi.teklynk.com/getbttvemotes.php?channel=${channel}`);
     emotes = await response.json();
-    bttvEmoteCodeToId = new Map(emotes.map((emote: any) => [emote['code'], emote['id']]));
+    if (Array.isArray(emotes)) {
+      bttvEmoteCodeToId = new Map(emotes.map((emote: any) => [emote['code'], emote['id']]));
+    }
   }
   if (!noFfz) {
     response = await fetch(`https://twitchapi.teklynk.com/getffzemotes.php?channel=${channel}`);
     emotes = await response.json();
-    ffzEmoteCodeToId = new Map(emotes.map((emote: any) => [emote['code'], emote['id']]));
+    if (Array.isArray(emotes)) {
+      ffzEmoteCodeToId = new Map(emotes.map((emote: any) => [emote['code'], emote['id']]));
+    }
   }
   if (!no7tv) {
     response = await fetch(`https://twitchapi.teklynk.com/get7tvemotes.php?channel=${channel}`);
     emotes = await response.json();
-    seventvEmoteCodeToId = new Map(emotes.map((emote: any) => [emote['code'], emote['id']]));
+    if (Array.isArray(emotes)) {
+      seventvEmoteCodeToId = new Map(emotes.map((emote: any) => [emote['code'], emote['id']]));
+    }
   }
-  if (debugMode) console.log('twitchEmoteCodeToId', twitchEmoteCodeToId, 'bttvEmoteCodeToId', bttvEmoteCodeToId, 'ffzEmoteCodeToId', ffzEmoteCodeToId, 'seventvEmoteCodeToId', seventvEmoteCodeToId);
+  if (debugMode) {
+    console.log('twitchEmoteCodeToId', twitchEmoteCodeToId, 'bttvEmoteCodeToId', bttvEmoteCodeToId, 'ffzEmoteCodeToId', ffzEmoteCodeToId, 'seventvEmoteCodeToId', seventvEmoteCodeToId);
+  }
 }
 
 function getEmoteImageUrl(word: string) {

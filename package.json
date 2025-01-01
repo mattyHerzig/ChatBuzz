@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "Simple OBS Plugin that displays repeated messages from a Twitch chat",
   "main": "./src/main.ts",
+  "scripts": {
+    "build": "webpack"
+  },
   "keywords": [
     "twitch",
     "twitchtv",
