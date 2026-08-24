@@ -1,5 +1,5 @@
 # ChatBuzz ![](./assets/favicon/favicon-32x32.png)
-ChatBuzz is a simple OBS Plugin that displays repeated messages from a Twitch chat.
+ChatBuzz is a simple OBS Plugin that displays repeated messages from a Twitch or YouTube chat.
 
 ## Setup & Demo (click)
 [![Setup & Demo Video](https://img.youtube.com/vi/h4NHr8qFQfI/0.jpg)](https://youtu.be/h4NHr8qFQfI "ChatBuzz Setup & Demo")
@@ -46,6 +46,8 @@ Text-To-Speech audio is served by StreamElements, so it needs an internet connec
 
 On Twitch, `ignore` matches the account's permanent username. YouTube has no equivalent, so there it matches the display name shown in chat, which anyone can change — treat it as best effort.
 
+YouTube chat comes through a small Cloudflare Worker (`worker/`), because YouTube, unlike Twitch, doesn't let a browser read live chat directly. Nothing to set up to use it.
+
 \* the bool paremeters, nocase–7tv, may be false on default, but I've made it so you don't need to provide "true" for it to be true. Simply include it as an argument e.g. "&topdown&notts" rather than "&topdown=true&notts=true".
 
 ## About
@@ -59,9 +61,10 @@ I appreciate any and all feedback! Have you encountered any issues? Do you want 
 - TypeScript (& JavaScript)
 - HTML
 - CSS
-- APIs ([tmi.js](https://github.com/tmijs/tmi.js), [teklynk_api_public](https://github.com/teklynk/twitch_api_public))
+- APIs ([tmi.js](https://github.com/tmijs/tmi.js), [teklynk_api_public](https://github.com/teklynk/twitch_api_public), YouTube live chat, [StreamElements](https://streamelements.com/) TTS)
 - Webpack
 - Node.js
+- Cloudflare Workers
 - General Web Development e.g. domain, hosting, favicon
 - Git
 - Unix shell
