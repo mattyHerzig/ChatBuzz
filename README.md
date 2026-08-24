@@ -62,7 +62,7 @@ I appreciate any and all feedback! Have you encountered any issues? Do you want 
 - HTML
 - CSS
 - APIs ([tmi.js](https://github.com/tmijs/tmi.js), [teklynk_api_public](https://github.com/teklynk/twitch_api_public), YouTube live chat, [StreamElements](https://streamelements.com/) TTS)
-- Webpack
+- Webpack (later swapped for esbuild)
 - Node.js
 - Cloudflare Workers
 - General Web Development e.g. domain, hosting, favicon
