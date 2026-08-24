@@ -194,7 +194,15 @@ async function poll({continuation, key, clientVersion} = {}) {
     const renderer = item?.liveChatTextMessageRenderer || item?.liveChatPaidMessageRenderer;
     if (!renderer) continue;
     const {parts, text} = toParts(renderer.message?.runs);
-    if (parts.length) messages.push({author: renderer.authorName?.simpleText || '', text, parts});
+    if (!parts.length) continue;
+    messages.push({
+      author: renderer.authorName?.simpleText || '',
+      // Real send time (ms). Lets the client replay the true gaps between messages
+      // instead of inventing an even spread across the poll interval.
+      sentAt: Number(renderer.timestampUsec) / 1000 || 0,
+      text,
+      parts,
+    });
   }
 
   // The shape varies with chat state

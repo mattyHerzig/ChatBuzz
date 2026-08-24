@@ -59,14 +59,28 @@ export function youtubeChat({id, proxyUrl, debugMode, onStatus}: YouTubeOptions)
         });
         if (!data || data.error) break;
 
-        if (isFirstPoll) isFirstPoll = false;
-        else for (const {author, text, parts} of data.messages) {
-          // YouTube has no stable login name, only a changeable display name
-          onMessage({username: (author || '').toLowerCase(), text, parts});
+        const interval = data.timeoutMs || 5000;
+        const startedAt = Date.now();
+
+        if (isFirstPoll) {
+          isFirstPoll = false;
+        } else {
+          // A poll answers with a whole batch at once, so replay it using each message's
+          // real send time. Spacing them evenly instead would invent a rhythm chat never
+          // had -- five messages fired off in one second would look five seconds apart.
+          let previousSentAt = 0;
+          for (const {author, text, parts, sentAt} of data.messages) {
+            if (previousSentAt && sentAt) {
+              await delay(Math.min(Math.max(sentAt - previousSentAt, 0), interval));
+            }
+            previousSentAt = sentAt;
+            // YouTube has no stable login name, only a changeable display name
+            onMessage({username: (author || '').toLowerCase(), text, parts});
+          }
         }
 
         next = data.continuation;
-        await delay(data.timeoutMs || 5000);
+        await delay(Math.max(0, interval - (Date.now() - startedAt)));
       }
       // Stream ended or the token expired; go back to waiting for it to be live
     }
