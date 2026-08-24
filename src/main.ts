@@ -1,5 +1,5 @@
 import { getURLParams, colorToRgb } from './urlParams';
-import { renderMessage } from './emotes';
+import { renderMessage, preloadEmotes } from './emotes';
 import { createSpeaker } from './tts';
 import { ChatMessage, ChatSource, MessagePart } from './chat';
 import { twitchChat } from './twitchChat';
@@ -10,6 +10,7 @@ const {
   youtube,
   youtubeProxy,
   ignoredUsers,
+  noCase,
   color,
   fontSize,
   emoteScale,
@@ -58,6 +59,8 @@ interface RepeatData {
   count: number;
   timeout: ReturnType<typeof setTimeout> | null;
   elements: RepeatElements | null;
+  /** First spelling seen; displayed and spoken even when 'nocase' folds later ones in */
+  text: string;
   parts: MessagePart[];
 }
 const activeRepeats: Map<string, RepeatData> = new Map();
@@ -90,16 +93,22 @@ function onChatMessage({username, text, parts}: ChatMessage) {
   // repeat threshold or keep an existing repeat alive
   if (username && ignoredUsers.has(username)) return;
 
-  let repeatData = activeRepeats.get(text);
+  // Emotes are fetched now rather than when the repeat appears, so the images are already
+  // cached by the time it does and the layout doesn't jump as they load in
+  preloadEmotes(parts);
+
+  // The first spelling seen is the one displayed and spoken; later ones only add to it
+  const key = noCase ? text.toLowerCase() : text;
+  let repeatData = activeRepeats.get(key);
   if (repeatData) {
     repeatData.count++;
   } else {
-    repeatData = {count: 1, timeout: null, elements: null, parts};
-    activeRepeats.set(text, repeatData);
+    repeatData = {count: 1, timeout: null, elements: null, text, parts};
+    activeRepeats.set(key, repeatData);
   }
-  restartTimeout(text, repeatData);
+  restartTimeout(key, repeatData);
   if (repeatData.count >= minRepeatCount) {
-    handleRepeatedMessage(text, repeatData);
+    handleRepeatedMessage(repeatData);
   }
 }
 
@@ -133,16 +142,16 @@ function createRepeatElements(parts: MessagePart[]): RepeatElements {
   return {wrapper, count};
 }
 
-function handleRepeatedMessage(message: string, repeatData: RepeatData) {
+function handleRepeatedMessage(repeatData: RepeatData) {
   if (repeatData.elements == null) {
     repeatData.elements = createRepeatElements(repeatData.parts);
-    speak(message);
+    speak(repeatData.text);
   } else if (!noRepeating && repeatData.count % minRepeatCount == 0) {
-    speak(message);
+    speak(repeatData.text);
   }
 
   const {wrapper, count} = repeatData.elements;
-  // Don't need a space before the 'x', added in insertEmotes()
+  // Don't need a space before the 'x', added by renderMessage()
   count.textContent = 'x' + repeatData.count.toString();
   wrapper.classList.remove('pop_anim');
   count.classList.remove('count_pop_anim');

@@ -71,6 +71,21 @@ export function getEmoteImageUrl(word: string) {
   return null;
 }
 
+const preloaded = new Set<string>();
+
+/**
+ * Starts loading a message's emotes into the browser cache. Called for every message, so
+ * by the time one has repeated enough to be displayed its images are ready and the layout
+ * doesn't jump as they pop in. Fire-and-forget: a failed load just falls back to alt text.
+ */
+export function preloadEmotes(parts: MessagePart[]) {
+  for (const part of parts) {
+    if (part.type !== 'emote' || preloaded.has(part.url)) continue;
+    preloaded.add(part.url);
+    new Image().src = part.url;
+  }
+}
+
 /**
  * Builds the message element from already-resolved parts. Twitch produces these by
  * looking each word up in the emote maps above; YouTube's emoji arrive from the API

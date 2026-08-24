@@ -54,7 +54,7 @@ export function getURLParams() {
     color: color && color in colorToRgb ? color : 'yellow',
     fontSize:       num('fontsize',   30.0, isPositive),
     emoteScale:     num('emotescale',  1.3, isPositive),
-    minRepeatCount: int('min',           3, (n) => n >= 1),
+    minRepeatCount: int('min',           2, (n) => n >= 1),
     repeatDuration: num('dur',         7.0, isPositive),
     windowWidth:    int('width',       800, isPositive),
     windowHeight:   int('height',      600, isPositive),
@@ -65,6 +65,8 @@ export function getURLParams() {
     // which would silently kill all speech -- and 'channel' is case-insensitive, so
     // users reasonably expect the same here
     ttsVoice:       voice ? voice.charAt(0).toUpperCase() + voice.slice(1).toLowerCase() : 'Brian',
+    // Repeats are matched on the exact text; 'nocase' folds "LOL" and "lol" together
+    noCase:      flag('nocase'),
     noTts:       flag('notts'),
     noRepeating: flag('norepeat'),
     isTopDown:   flag('topdown'),
