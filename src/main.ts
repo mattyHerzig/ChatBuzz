@@ -57,7 +57,6 @@ interface RepeatElements {
   count: HTMLSpanElement;
 }
 
-const hasEmote = (parts: MessagePart[]) => parts.some((part) => part.type === 'emote');
 interface RepeatData {
   count: number;
   timeout: ReturnType<typeof setTimeout> | null;
@@ -68,8 +67,8 @@ interface RepeatData {
 }
 const activeRepeats: Map<string, RepeatData> = new Map();
 
-// 'yt' wins if both are given, so an existing '?channel=' in the URL can't quietly
-// override a newly added YouTube channel
+const hasEmote = (parts: MessagePart[]) => parts.some((part) => part.type === 'emote');
+
 // Both can run at once: they feed the same counter, so a message repeated across a
 // simulcast counts as one combined repeat rather than two separate ones
 const sources: ChatSource[] = [];
@@ -87,7 +86,7 @@ if (youtube) {
 
 if (sources.length === 0) {
   spaceElement.textContent =
-    'Add "?channel=CHANNEL" (Twitch) or "?yt=@HANDLE" (YouTube) to the end of the URL. Check GitHub for more arguments and info.';
+    'Add "?twitch=CHANNEL" or "?youtube=@HANDLE" to the end of the URL. Check GitHub for more arguments and info.';
 }
 for (const source of sources) {
   source(onChatMessage).catch((error) => {

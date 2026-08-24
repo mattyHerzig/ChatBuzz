@@ -34,8 +34,11 @@ export function getURLParams() {
   // Present without a value counts as true e.g. "&topdown" == "&topdown=true"
   const flag = (name: string) => urlParams.has(name) && urlParams.get(name) !== 'false';
 
-  const channel = urlParams.get('channel');
-  const youtube = urlParams.get('yt');
+  // 'twitch'/'youtube' read better side by side now that there are two platforms, but
+  // 'channel' and 'yt' are what the demo video, the OBS forum listing and every existing
+  // browser source use, so they keep working
+  const channel = urlParams.get('twitch') || urlParams.get('channel');
+  const youtube = urlParams.get('youtube') || urlParams.get('yt');
   const ignore = urlParams.get('ignore');
   const color = urlParams.get('color');
   const voice = urlParams.get('voice');

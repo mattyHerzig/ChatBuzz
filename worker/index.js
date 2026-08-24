@@ -144,6 +144,11 @@ async function resolve(id) {
   return json({live: true, videoId, key, clientVersion, continuation});
 }
 
+// TODO: 7TV/BTTV emotes typed in YouTube chat stay as plain text here. Their browser
+// extensions do render them, but neither exposes a YouTube channel lookup: 7TV's REST API
+// answers `invalid platform` for youtube (twitch/kick/discord return `user not found`), and
+// BTTV's 404 is meaningless -- it returns the same for a provider that doesn't exist at all.
+// Worth revisiting if either ships a YouTube route; don't re-derive it from the 404s.
 function toParts(runs) {
   const parts = [];
   let text = '';
