@@ -46,7 +46,7 @@ Text-To-Speech audio is served by StreamElements, so it needs an internet connec
 
 On Twitch, `ignore` matches the account's permanent username. YouTube has no equivalent, so there it matches the display name shown in chat, which anyone can change — treat it as best effort.
 
-YouTube chat comes through a small Cloudflare Worker (`worker/`), because YouTube, unlike Twitch, doesn't let a browser read live chat directly. Nothing to set up to use it.
+YouTube chat comes through a small Cloudflare Worker (`worker/`), because YouTube, unlike Twitch, doesn't let a browser read live chat directly. Nothing to set up to use it. If you fork ChatBuzz and run your own, point at it with `&ytproxy=YOUR_WORKER_URL`.
 
 \* the bool paremeters, nocase–7tv, may be false on default, but I've made it so you don't need to provide "true" for it to be true. Simply include it as an argument e.g. "&topdown&notts" rather than "&topdown=true&notts=true".
 
