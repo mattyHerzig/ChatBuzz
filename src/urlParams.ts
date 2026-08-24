@@ -34,11 +34,10 @@ export function getURLParams() {
   // Present without a value counts as true e.g. "&topdown" == "&topdown=true"
   const flag = (name: string) => urlParams.has(name) && urlParams.get(name) !== 'false';
 
-  // 'twitch'/'youtube' read better side by side now that there are two platforms, but
-  // 'channel' and 'yt' are what the demo video, the OBS forum listing and every existing
-  // browser source use, so they keep working
+  // 'channel' predates YouTube support and is what the demo video, the OBS forum listing
+  // and every existing browser source use, so it keeps working alongside 'twitch'
   const channel = urlParams.get('twitch') || urlParams.get('channel');
-  const youtube = urlParams.get('youtube') || urlParams.get('yt');
+  const youtube = urlParams.get('youtube');
   const ignore = urlParams.get('ignore');
   const color = urlParams.get('color');
   const voice = urlParams.get('voice');
@@ -48,7 +47,7 @@ export function getURLParams() {
     // A @handle or a UC... channel id. Case is preserved: unlike Twitch logins, both
     // YouTube forms are case-sensitive.
     youtube: youtube && youtube.trim(),
-    youtubeProxy: urlParams.get('ytproxy'),
+    youtubeProxy: urlParams.get('youtubeproxy'),
     // Lower-cased like 'channel', since Twitch logins are case-insensitive.
     // filter(Boolean) tolerates stray/trailing commas e.g. "ignore=nightbot,"
     ignoredUsers: new Set(

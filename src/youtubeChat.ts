@@ -1,7 +1,7 @@
 import { ChatSource } from './chat';
 
 // YouTube sends no CORS headers, so chat has to come through a proxy -- see worker/index.js.
-// Override with &ytproxy= to point at a local `wrangler dev` without rebuilding.
+// Override with &youtubeproxy= to point at a local `wrangler dev` without rebuilding.
 export const DEFAULT_PROXY = 'https://chatbuzz-yt.mattyherzig.workers.dev';
 
 const OFFLINE_RETRY_MS = 30_000;

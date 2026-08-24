@@ -20,7 +20,7 @@ Your OBS Browser Source URL should look like "https://chatbuzz.app/?twitch=CHANN
 | Parameter  | Definition                                                                                                                                    | Data Type | Constraints                                                | Default Value |
 |------------|-----------------------------------------------------------------------------------------------------------------------------------------------|-----------|------------------------------------------------------------|---------------|
 | twitch     | Twitch channel username. Also accepted as "channel"                                                                                           | string    | -                                                          | -             |
-| youtube    | YouTube channel handle or ID e.g. "@LofiGirl" or "UCSJ4gkVC6NrvII8umztf0Ow". Also accepted as "yt". Can be combined with twitch; waits and connects on its own if you aren't live yet | string    | -                                                          | -             |
+| youtube    | YouTube channel handle or ID e.g. "@LofiGirl" or "UCSJ4gkVC6NrvII8umztf0Ow". Can be combined with twitch; waits and connects on its own if you aren't live yet | string    | -                                                          | -             |
 | ignore     | Usernames to ignore entirely, comma separated e.g. "nightbot,streamelements". Their messages don't count towards repeats at all (case insensitive)   | string    | -                                                          | -             |
 | color      | Repeat font color                                                                                                                             | string    | pink \| red \| orange \| yellow \| green \| blue \| purple | yellow        |
 | fontsize   | Repeat font size                                                                                                                              | float     | > 0.0                                                      | 30.0          |
@@ -46,7 +46,7 @@ Text-To-Speech audio is served by StreamElements, so it needs an internet connec
 
 On Twitch, `ignore` matches the account's permanent username. YouTube has no equivalent, so there it matches the display name shown in chat, which anyone can change — treat it as best effort.
 
-YouTube chat comes through a small Cloudflare Worker (`worker/`), because YouTube, unlike Twitch, doesn't let a browser read live chat directly. Nothing to set up to use it. If you fork ChatBuzz and run your own, point at it with `&ytproxy=YOUR_WORKER_URL`.
+YouTube chat comes through a small Cloudflare Worker (`worker/`), because YouTube, unlike Twitch, doesn't let a browser read live chat directly. Nothing to set up to use it. If you fork ChatBuzz and run your own, point at it with `&youtubeproxy=YOUR_WORKER_URL`.
 
 \* the bool paremeters, nocase–7tv, may be false on default, but I've made it so you don't need to provide "true" for it to be true. Simply include it as an argument e.g. "&topdown&notts" rather than "&topdown=true&notts=true".
 
