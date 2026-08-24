@@ -29,25 +29,58 @@ const json = (data, status = 200) =>
     headers: {...CORS, 'Content-Type': 'application/json'},
   });
 
+// YouTube serves datacenter IPs (which is what a Worker is) a degraded page unless the
+// request looks like a real browser. The consent cookies skip Google's interstitial.
+const BROWSER_HEADERS = {
+  'User-Agent': UA,
+  Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+  'Accept-Language': 'en-US,en;q=0.9',
+  Cookie: 'CONSENT=YES+cb; SOCS=CAISNQgQEitib3E3cA',
+  'Upgrade-Insecure-Requests': '1',
+  'Sec-Fetch-Dest': 'document',
+  'Sec-Fetch-Mode': 'navigate',
+  'Sec-Fetch-Site': 'none',
+};
+
 const ytFetch = (url, init = {}) =>
-  fetch(url, {
-    ...init,
-    headers: {'User-Agent': UA, 'Accept-Language': 'en-US,en', ...(init.headers || {})},
-  });
+  fetch(url, {...init, headers: {...BROWSER_HEADERS, ...(init.headers || {})}});
+
+/**
+ * Fetches a YouTube page, retrying while it comes back degraded. Even with browser-like
+ * headers YouTube intermittently serves Workers a stripped page -- one with
+ * `href="undefined"` and no live markers -- so give it a couple of chances.
+ */
+async function ytFetchPage(url, isUsable, attempts = 3) {
+  let html = '';
+  for (let i = 0; i < attempts; i++) {
+    const res = await ytFetch(url);
+    if (!res.ok) continue;
+    html = await res.text();
+    if (isUsable(html)) return html;
+  }
+  return html;
+}
 
 const match = (html, re) => {
   const m = html.match(re);
   return m ? m[1] : null;
 };
 
-// Pulls the `window["ytInitialData"] = {...}` blob out of a page. Brace-matched rather
-// than regexed, because the object is deeply nested and contains braces inside strings.
+// YouTube uses different assignment forms depending on which page variant it serves --
+// a browser IP tends to get `window["ytInitialData"]`, a datacenter IP `var ytInitialData`.
+const INITIAL_DATA_MARKERS = ['window["ytInitialData"] =', 'var ytInitialData ='];
+
+// Pulls the ytInitialData blob out of a page. Brace-matched rather than regexed, because
+// the object is deeply nested and contains braces inside strings.
 function extractInitialData(html) {
-  const marker = 'window["ytInitialData"] = ';
-  const at = html.indexOf(marker);
-  if (at === -1) return null;
-  const start = at + marker.length;
-  if (html[start] !== '{') return null;
+  let start = -1;
+  for (const marker of INITIAL_DATA_MARKERS) {
+    const at = html.indexOf(marker);
+    if (at === -1) continue;
+    const candidate = html.indexOf('{', at + marker.length);
+    if (candidate !== -1 && (start === -1 || candidate < start)) start = candidate;
+  }
+  if (start === -1) return null;
 
   let depth = 0;
   let inString = false;
@@ -97,9 +130,13 @@ async function resolve(id) {
   }
 
   const path = id.startsWith('@') ? id : `channel/${id}`;
-  const res = await ytFetch(`https://www.youtube.com/${path}/live`);
-  if (!res.ok) return json({error: 'could not reach channel'}, 502);
-  const html = await res.text();
+  // A usable channel page has the innertube config; the live markers may legitimately be
+  // absent when the channel simply isn't streaming, so they can't gate the retry
+  const html = await ytFetchPage(
+    `https://www.youtube.com/${path}/live`,
+    (page) => /"INNERTUBE_API_KEY":"/.test(page) && !/href="undefined"/.test(page),
+  );
+  if (!html) return json({error: 'could not reach channel'}, 502);
 
   // An offline channel still returns 200 with a stale videoId for an old upload, but no
   // canonical watch link and no isLiveNow. Requiring both avoids silently attaching to a VOD.
@@ -110,9 +147,12 @@ async function resolve(id) {
   const key = match(html, /"INNERTUBE_API_KEY":"([^"]+)"/);
   const clientVersion = match(html, /"INNERTUBE_CLIENT_VERSION":"([^"]+)"/);
 
-  const chatRes = await ytFetch(`https://www.youtube.com/live_chat?v=${videoId}`);
-  if (!chatRes.ok) return json({error: 'could not reach live chat'}, 502);
-  const continuation = liveChatContinuation(await chatRes.text());
+  const chatHtml = await ytFetchPage(
+    `https://www.youtube.com/live_chat?v=${videoId}`,
+    (page) => Boolean(extractInitialData(page)),
+  );
+  if (!chatHtml) return json({error: 'could not reach live chat'}, 502);
+  const continuation = liveChatContinuation(chatHtml);
 
   if (!key || !clientVersion || !continuation) {
     // Reaching here means YouTube changed its markup -- redeploy with updated regexes
@@ -207,6 +247,44 @@ export default {
       }
       if (url.pathname === '/poll' && request.method === 'POST') {
         return await poll(await request.json());
+      }
+      // Diagnostic for when YouTube starts serving this Worker something unexpected,
+      // which is the most likely way this breaks
+      if (url.pathname === '/debug' && request.method === 'GET') {
+        const id = url.searchParams.get('id') || '@LofiGirl';
+        if (!HANDLE.test(id) && !CHANNEL_ID.test(id)) return json({error: 'bad id'}, 400);
+        const path = id.startsWith('@') ? id : `channel/${id}`;
+        const channelRes = await ytFetch(`https://www.youtube.com/${path}/live`);
+        const channelHtml = await channelRes.text();
+        const videoId = match(channelHtml, /<link rel="canonical" href="https:\/\/www\.youtube\.com\/watch\?v=([\w-]{11})"/);
+        const step1 = {
+          status: channelRes.status,
+          bytes: channelHtml.length,
+          videoId,
+          isLiveNow: /"isLiveNow":true/.test(channelHtml),
+          key: match(channelHtml, /"INNERTUBE_API_KEY":"([^"]+)"/),
+          clientVersion: match(channelHtml, /"INNERTUBE_CLIENT_VERSION":"([^"]+)"/),
+        };
+        if (!videoId) return json({step1, note: 'no canonical videoId; stopping'});
+
+        const chatRes = await ytFetch(`https://www.youtube.com/live_chat?v=${videoId}`);
+        const chatHtml = await chatRes.text();
+        const initial = extractInitialData(chatHtml);
+        const subMenuItems =
+          initial?.contents?.liveChatRenderer?.header?.liveChatHeaderRenderer?.viewSelector
+            ?.sortFilterSubMenuRenderer?.subMenuItems || [];
+        return json({
+          step1,
+          step2: {
+            status: chatRes.status,
+            bytes: chatHtml.length,
+            hasInitialDataMarker: chatHtml.includes('window["ytInitialData"]'),
+            initialDataParsed: Boolean(initial),
+            subMenuTitles: subMenuItems.map((i) => i?.title),
+            continuationFound: Boolean(liveChatContinuation(chatHtml)),
+            markerForms: [...chatHtml.matchAll(/.{25}ytInitialData.{25}/g)].map((m) => m[0]).slice(0, 3),
+          },
+        });
       }
       return json({error: 'not found'}, 404);
     } catch (error) {
