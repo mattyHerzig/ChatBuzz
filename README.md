@@ -29,7 +29,6 @@ Your OBS Browser Source URL should look like "https://chatbuzz.app/?twitch=CHANN
 | dur        | Duration (in seconds) until a repeat expires without new identical messages                                                                   | float     | > 0.0                                                      | 7.0           |
 | width      | Window width                                                                                                                                  | int       | > 0                                                        | 800           |
 | height     | Window height                                                                                                                                 | int       | > 0                                                        | 600           |
-| voice      | Text-To-Speech voice (case insensitive)                                                                                                       | string    | Brian \| Amy \| Joanna \| Salli \| Ricardo                   | Brian         |
 | vol        | Text-To-Speech volume                                                                                                                         | float     | clamped to 0.0-1.0                                         | 0.5           |
 | rate       | Text-To-Speech playback rate                                                                                                                  | float     | clamped to 0.25-4.0                                        | 1.0           |
 | nocase     | Ignore capitalisation when matching repeats, so "LOL" and "lol" count together. The first spelling seen is the one shown | bool*     | -                                                          | false         |
@@ -41,6 +40,8 @@ Your OBS Browser Source URL should look like "https://chatbuzz.app/?twitch=CHANN
 | noffz      | Exclude FrankerFaceZ emotes                                                                                                                   | bool*     | -                                                          | false         |
 | no7tv      | Exclude 7TV emotes                                                                                                                            | bool*     | -                                                          | false         |
 | debug      | Debug mode                                                                                                                                    | bool*     | -                                                          | false         |
+
+<!-- | voice      | Text-To-Speech voice (case insensitive)                                                                                                       | string    | Brian \| Amy \| Joanna \| Salli \| Ricardo                   | Brian         | -->
 
 Text-To-Speech audio is served by StreamElements, so it needs an internet connection. If you get no speech, check the voice name first.
 
