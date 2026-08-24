@@ -35,12 +35,17 @@ export function getURLParams() {
   const flag = (name: string) => urlParams.has(name) && urlParams.get(name) !== 'false';
 
   const channel = urlParams.get('channel');
+  const youtube = urlParams.get('yt');
   const ignore = urlParams.get('ignore');
   const color = urlParams.get('color');
   const voice = urlParams.get('voice');
 
   return {
     channel: channel && channel.toLowerCase(),
+    // A @handle or a UC... channel id. Case is preserved: unlike Twitch logins, both
+    // YouTube forms are case-sensitive.
+    youtube: youtube && youtube.trim(),
+    youtubeProxy: urlParams.get('ytproxy'),
     // Lower-cased like 'channel', since Twitch logins are case-insensitive.
     // filter(Boolean) tolerates stray/trailing commas e.g. "ignore=nightbot,"
     ignoredUsers: new Set(

@@ -1,10 +1,14 @@
-import * as tmi from 'tmi.js'
 import { getURLParams, colorToRgb } from './urlParams';
-import { fetchEmotes, insertEmotes } from './emotes';
+import { renderMessage } from './emotes';
 import { createSpeaker } from './tts';
+import { ChatMessage, ChatSource, MessagePart } from './chat';
+import { twitchChat } from './twitchChat';
+import { youtubeChat, DEFAULT_PROXY } from './youtubeChat';
 
 const {
   channel,
+  youtube,
+  youtubeProxy,
   ignoredUsers,
   color,
   fontSize,
@@ -54,38 +58,49 @@ interface RepeatData {
   count: number;
   timeout: ReturnType<typeof setTimeout> | null;
   elements: RepeatElements | null;
+  parts: MessagePart[];
 }
 const activeRepeats: Map<string, RepeatData> = new Map();
 
-if (!channel) {
-  spaceElement.textContent = 'Add "?channel=CHANNEL" to the end of the URL. Check GitHub for more arguments and info.';
+// 'yt' wins if both are given, so an existing '?channel=' in the URL can't quietly
+// override a newly added YouTube channel
+const source: ChatSource | null = youtube
+  ? youtubeChat({
+      id: youtube,
+      proxyUrl: youtubeProxy || DEFAULT_PROXY,
+      debugMode,
+      onStatus: (text) => { spaceElement.textContent = text; },
+    })
+  : channel
+  ? twitchChat({channel, noBttv, noFfz, no7tv, debugMode})
+  : null;
+
+if (source == null) {
+  spaceElement.textContent =
+    'Add "?channel=CHANNEL" (Twitch) or "?yt=@HANDLE" (YouTube) to the end of the URL. Check GitHub for more arguments and info.';
 } else {
-  start(channel).catch((error) => console.error(error));
+  source(onChatMessage).catch((error) => {
+    if (debugMode) console.error(error);
+    spaceElement.textContent = 'Could not connect to chat. Check the channel name.';
+  });
 }
 
-async function start(channel: string) {
-  // Emotes first so the very first repeat can already render them
-  await fetchEmotes(channel, noBttv, noFfz, no7tv, debugMode);
+function onChatMessage({username, text, parts}: ChatMessage) {
+  // Skipped before counting, so an ignored user can't push a message to its
+  // repeat threshold or keep an existing repeat alive
+  if (username && ignoredUsers.has(username)) return;
 
-  const client = new tmi.Client({channels: [channel], connection: {reconnect: true}});
-  client.on('message', (_channel, tags, message) => {
-    // Skipped before counting, so an ignored user can't push a message to its
-    // repeat threshold or keep an existing repeat alive
-    if (tags.username && ignoredUsers.has(tags.username.toLowerCase())) return;
-
-    let repeatData = activeRepeats.get(message);
-    if (repeatData) {
-      repeatData.count++;
-    } else {
-      repeatData = {count: 1, timeout: null, elements: null};
-      activeRepeats.set(message, repeatData);
-    }
-    restartTimeout(message, repeatData);
-    if (repeatData.count >= minRepeatCount) {
-      handleRepeatedMessage(message, repeatData);
-    }
-  });
-  await client.connect();
+  let repeatData = activeRepeats.get(text);
+  if (repeatData) {
+    repeatData.count++;
+  } else {
+    repeatData = {count: 1, timeout: null, elements: null, parts};
+    activeRepeats.set(text, repeatData);
+  }
+  restartTimeout(text, repeatData);
+  if (repeatData.count >= minRepeatCount) {
+    handleRepeatedMessage(text, repeatData);
+  }
 }
 
 function restartTimeout(message: string, repeatData: RepeatData) {
@@ -100,13 +115,13 @@ function restartTimeout(message: string, repeatData: RepeatData) {
   }, repeatDuration * 1000);
 }
 
-function createRepeatElements(message: string): RepeatElements {
+function createRepeatElements(parts: MessagePart[]): RepeatElements {
   const count = document.createElement('span');
   count.className = 'count';
 
   const wrapper = document.createElement('div');
   wrapper.className = 'repeat_wrapper spawn_anim';
-  wrapper.appendChild(insertEmotes(message));
+  wrapper.appendChild(renderMessage(parts));
   wrapper.appendChild(count);
   // once: true, otherwise every later pop_anim would re-trigger this handler
   wrapper.addEventListener('animationend', () => {
@@ -120,7 +135,7 @@ function createRepeatElements(message: string): RepeatElements {
 
 function handleRepeatedMessage(message: string, repeatData: RepeatData) {
   if (repeatData.elements == null) {
-    repeatData.elements = createRepeatElements(message);
+    repeatData.elements = createRepeatElements(repeatData.parts);
     speak(message);
   } else if (!noRepeating && repeatData.count % minRepeatCount == 0) {
     speak(message);

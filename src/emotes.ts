@@ -1,3 +1,5 @@
+import { MessagePart } from './chat';
+
 let twitchEmoteCodeToId  : Map<string, string> = new Map();
 let bttvEmoteCodeToId    : Map<string, string> = new Map();
 let ffzEmoteCodeToId     : Map<string, string> = new Map();
@@ -57,7 +59,7 @@ export async function fetchEmotes(channel: string, noBttv: boolean, noFfz: boole
   }
 }
 
-function getEmoteImageUrl(word: string) {
+export function getEmoteImageUrl(word: string) {
   let id = twitchEmoteCodeToId.get(word);
   if (id) return `https://static-cdn.jtvnw.net/emoticons/v2/${id}/default/dark/3.0`
   id = bttvEmoteCodeToId.get(word);
@@ -69,19 +71,23 @@ function getEmoteImageUrl(word: string) {
   return null;
 }
 
-export function insertEmotes(message: string): HTMLSpanElement {
+/**
+ * Builds the message element from already-resolved parts. Twitch produces these by
+ * looking each word up in the emote maps above; YouTube's emoji arrive from the API
+ * with their image URLs already attached.
+ */
+export function renderMessage(parts: MessagePart[]): HTMLSpanElement {
   const messageElement = document.createElement('span');
   messageElement.className = 'message';
-  for (const word of message.split(' ')) {
-    const emoteImageUrl = getEmoteImageUrl(word);
-    if (emoteImageUrl) {
+  for (const part of parts) {
+    if (part.type === 'emote') {
       const emoteElement = document.createElement('img');
-      emoteElement.src = emoteImageUrl;
-      emoteElement.alt = word; // Falls back to the emote code if the image fails
+      emoteElement.src = part.url;
+      emoteElement.alt = part.code; // Falls back to the emote code if the image fails
       emoteElement.className = 'emote';
       messageElement.appendChild(emoteElement);
     } else {
-      messageElement.appendChild(document.createTextNode(word));
+      messageElement.appendChild(document.createTextNode(part.text));
     }
     // Trailing non-breaking space, also separates the last word from the 'xN' count
     messageElement.appendChild(document.createTextNode('\u00A0'));

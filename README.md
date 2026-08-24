@@ -14,12 +14,13 @@ ChatBuzz is a simple OBS Plugin that displays repeated messages from a Twitch ch
 ## URL Parameters
 I've configured ChatBuzz so that its width and height are the same as the OBS Browser Source's default, 800x600. Because of this, it's as simple as putting in the URL and clicking "OK".
 
-Your OBS Browser Source URL should look like "https://chatbuzz.app/?channel=CHANNEL", with CHANNEL being replaced by your Twitch channel's username (case insensitive). In addition, you can also add how ever many arguments to the end as you need, in any order, in the form '&PARAMETER=ARGUMENT'. For example, you may have "https://chatbuzz.app/?channel=xqc&notts&min=5&dur=10.5&color=red".
+Your OBS Browser Source URL should look like "https://chatbuzz.app/?channel=CHANNEL", with CHANNEL being replaced by your Twitch channel's username (case insensitive). For YouTube, use "https://chatbuzz.app/?yt=@HANDLE" instead, with @HANDLE being your channel's handle or its "UC..." channel ID. Either way the URL stays the same from stream to stream. In addition, you can also add how ever many arguments to the end as you need, in any order, in the form '&PARAMETER=ARGUMENT'. For example, you may have "https://chatbuzz.app/?channel=xqc&notts&min=5&dur=10.5&color=red".
 
 ### Table of Parameters
 | Parameter  | Definition                                                                                                                                    | Data Type | Constraints                                                | Default Value |
 |------------|-----------------------------------------------------------------------------------------------------------------------------------------------|-----------|------------------------------------------------------------|---------------|
-| channel    | Channel username                                                                                                                              | string    | -                                                          | -             |
+| channel    | Twitch channel username                                                                                                                       | string    | -                                                          | -             |
+| yt         | YouTube channel handle or ID e.g. "@LofiGirl" or "UCSJ4gkVC6NrvII8umztf0Ow". Use instead of channel; waits and connects on its own if you aren't live yet | string    | -                                                          | -             |
 | ignore     | Usernames to ignore entirely, comma separated e.g. "nightbot,streamelements". Their messages don't count towards repeats at all (case insensitive)   | string    | -                                                          | -             |
 | color      | Repeat font color                                                                                                                             | string    | pink \| red \| orange \| yellow \| green \| blue \| purple | yellow        |
 | fontsize   | Repeat font size                                                                                                                              | float     | > 0.0                                                      | 30.0          |
@@ -41,6 +42,8 @@ Your OBS Browser Source URL should look like "https://chatbuzz.app/?channel=CHAN
 | debug      | Debug mode                                                                                                                                    | bool*     | -                                                          | false         |
 
 Text-To-Speech audio is served by StreamElements, so it needs an internet connection. If you get no speech, check the voice name first.
+
+On Twitch, `ignore` matches the account's permanent username. YouTube has no equivalent, so there it matches the display name shown in chat, which anyone can change — treat it as best effort.
 
 \* the bool paremeters, notts–7tv, may be false on default, but I've made it so you don't need to provide "true" for it to be true. Simply include it as an argument e.g. "&topdown&notts" rather than "&topdown=true&notts=true".
 

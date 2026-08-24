@@ -1,0 +1,8 @@
+# Deploy from this directory with:  npx wrangler login  &&  npx wrangler deploy
+# Then make sure DEFAULT_PROXY in ../src/youtubeChat.ts matches the deployed URL.
+# Test locally with:  npx wrangler dev  ...and load ChatBuzz with
+# &ytproxy=http://localhost:8787 to point at it without rebuilding.
+
+name = "chatbuzz-yt"
+main = "index.js"
+compatibility_date = "2026-08-23"
