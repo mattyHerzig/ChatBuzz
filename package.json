@@ -2,9 +2,10 @@
   "name": "chatbuzz",
   "version": "1.0.0",
   "description": "Simple OBS Plugin that displays repeated messages from a Twitch chat",
-  "main": "./src/main.ts",
+  "private": true,
   "scripts": {
-    "build": "webpack"
+    "build": "webpack",
+    "typecheck": "tsc --noEmit"
   },
   "keywords": [
     "twitch",
@@ -16,9 +17,11 @@
   ],
   "author": "Matty Herzig",
   "license": "MIT",
+  "dependencies": {
+    "tmi.js": "^1.8.5"
+  },
   "devDependencies": {
     "@types/tmi.js": "^1.8.6",
-    "tmi.js": "^1.8.5",
     "ts-loader": "^9.4.4",
     "typescript": "^5.1.6",
     "webpack": "^5.84.1",

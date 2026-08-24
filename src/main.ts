@@ -1,11 +1,11 @@
 import * as tmi from 'tmi.js'
 import { getURLParams, colorToRgb } from './urlParams';
 import { fetchEmotes, insertEmotes } from './emotes';
-
-
+import { createSpeaker } from './tts';
 
 const {
   channel,
+  ignoredUsers,
   color,
   fontSize,
   emoteScale,
@@ -15,7 +15,7 @@ const {
   windowHeight,
   ttsVolume,
   ttsRate,
-  ttsPitch,
+  ttsVoice,
   noTts,
   noRepeating,
   isTopDown,
@@ -26,102 +26,112 @@ const {
   debugMode,
 } = getURLParams();
 
-document.documentElement.style.setProperty('--color', colorToRgb[color]);
-document.documentElement.style.setProperty('--font-size', fontSize.toString() + 'px');
-document.documentElement.style.setProperty('--emote-scale', emoteScale.toString());
-document.documentElement.style.setProperty('--width', windowWidth.toString() + 'px');
-document.documentElement.style.setProperty('--height', windowHeight.toString() + 'px');
-document.documentElement.style.setProperty('--flex-direction', isTopDown ? 'column' : 'column-reverse');
-document.documentElement.style.setProperty('--align-items', isRightSide ? 'flex-end' : 'flex-start');
-document.documentElement.style.setProperty('--border-style', debugMode ? 'solid' : 'none');
-
-const spaceElement = document.getElementById('space')!;  
-
-if (!channel) {
-  spaceElement.textContent = 'Add "?channel=CHANNEL" to the end of the URL. Check GitHub for more arguments and info.';
-  throw new Error('channel null');
+const cssVariables: Record<string, string> = {
+  '--color': colorToRgb[color],
+  '--font-size': `${fontSize}px`,
+  '--emote-scale': `${emoteScale}`,
+  '--width': `${windowWidth}px`,
+  '--height': `${windowHeight}px`,
+  '--flex-direction': isTopDown ? 'column' : 'column-reverse',
+  '--align-items': isRightSide ? 'flex-end' : 'flex-start',
+  '--border-style': debugMode ? 'solid' : 'none',
+};
+for (const [name, value] of Object.entries(cssVariables)) {
+  document.documentElement.style.setProperty(name, value);
 }
 
+const spaceElement = document.getElementById('space')!;
 
+const speak = noTts
+  ? () => {}
+  : createSpeaker({voice: ttsVoice, volume: ttsVolume, rate: ttsRate, debugMode});
 
+interface RepeatElements {
+  wrapper: HTMLDivElement;
+  count: HTMLSpanElement;
+}
 interface RepeatData {
   count: number;
-  timeout: NodeJS.Timeout | null;
-  element: Element | null;
+  timeout: ReturnType<typeof setTimeout> | null;
+  elements: RepeatElements | null;
 }
 const activeRepeats: Map<string, RepeatData> = new Map();
 
-const client = new tmi.Client({channels: [channel], connection: {reconnect: true}});
-client.connect();
+if (!channel) {
+  spaceElement.textContent = 'Add "?channel=CHANNEL" to the end of the URL. Check GitHub for more arguments and info.';
+} else {
+  start(channel).catch((error) => console.error(error));
+}
 
-fetchEmotes(channel, noBttv, noFfz, no7tv, debugMode);
+async function start(channel: string) {
+  // Emotes first so the very first repeat can already render them
+  await fetchEmotes(channel, noBttv, noFfz, no7tv, debugMode);
 
-function restartTimeout(message: string) {
-  const repeatData = activeRepeats.get(message)!;
+  const client = new tmi.Client({channels: [channel], connection: {reconnect: true}});
+  client.on('message', (_channel, tags, message) => {
+    // Skipped before counting, so an ignored user can't push a message to its
+    // repeat threshold or keep an existing repeat alive
+    if (tags.username && ignoredUsers.has(tags.username.toLowerCase())) return;
+
+    let repeatData = activeRepeats.get(message);
+    if (repeatData) {
+      repeatData.count++;
+    } else {
+      repeatData = {count: 1, timeout: null, elements: null};
+      activeRepeats.set(message, repeatData);
+    }
+    restartTimeout(message, repeatData);
+    if (repeatData.count >= minRepeatCount) {
+      handleRepeatedMessage(message, repeatData);
+    }
+  });
+  await client.connect();
+}
+
+function restartTimeout(message: string, repeatData: RepeatData) {
   if (repeatData.timeout != null) clearTimeout(repeatData.timeout);
   repeatData.timeout = setTimeout(() => {
-    if (repeatData.element != null) {
-      repeatData.element.classList.add('shrink_anim');
-      repeatData.element.addEventListener('animationend', (event) => {
-        repeatData.element!.remove(); // spaceElement.removeChild(repeatData.element!);
-      });
+    const elements = repeatData.elements;
+    if (elements != null) {
+      elements.wrapper.classList.add('shrink_anim');
+      elements.wrapper.addEventListener('animationend', () => elements.wrapper.remove(), {once: true});
     }
     activeRepeats.delete(message);
   }, repeatDuration * 1000);
 }
 
-client.on('message', (channel: any, tags: any, message: string, self: any) => {
-  const foundRepeatData = activeRepeats.get(message);
-  if (foundRepeatData) {
-    handleRepeatedMessage(message, foundRepeatData);
-  } else {
-    const repeatData = {count: 1, timeout: null, element: null};
-    activeRepeats.set(message, repeatData);
-    restartTimeout(message);
-  }
-});
+function createRepeatElements(message: string): RepeatElements {
+  const count = document.createElement('span');
+  count.className = 'count';
 
-function handleRepeatedMessage(message: string, repeatData: RepeatData) {
-  repeatData.count++;
-  restartTimeout(message);
-  if (repeatData.count >= minRepeatCount) {
-    let countElement: HTMLSpanElement;
-    if (repeatData.element == null) {
-      const messageElement = insertEmotes(message);
-      countElement = document.createElement('span');
-      countElement.className = 'count';
-      // Don't need a space before the 'x', added in insertEmotes()
-      countElement.textContent = 'x' + repeatData.count.toString();
-      const repeatWrapper = document.createElement('div');
-      repeatWrapper.appendChild(messageElement);
-      repeatWrapper.appendChild(countElement);
-      repeatWrapper.className = 'repeat_wrapper spawn_anim';
-      repeatWrapper.addEventListener('animationend', (event) => {
-        repeatWrapper.classList.add('pop_anim');
-        countElement.classList.add('count_pop_anim');
-      });
-      repeatData.element = spaceElement.appendChild(repeatWrapper);
-      speak(message);
-    } else {
-      countElement = repeatData.element.children[1] as HTMLSpanElement;
-      // Same as above, "don't need a space before the 'x'..."
-      countElement.textContent = 'x' + repeatData.count.toString();
-      if (!noRepeating && repeatData.count % minRepeatCount == 0) speak(message);
-    }
-    repeatData.element.classList.remove('pop_anim');
-    countElement.classList.remove('count_pop_anim');
-    repeatData.element.classList.add('pop_anim');
-    countElement.classList.add('count_pop_anim');
-    // Replacing the element with itself updates the repeatData's element
-    spaceElement.replaceChild(repeatData.element, repeatData.element);
-  }
+  const wrapper = document.createElement('div');
+  wrapper.className = 'repeat_wrapper spawn_anim';
+  wrapper.appendChild(insertEmotes(message));
+  wrapper.appendChild(count);
+  // once: true, otherwise every later pop_anim would re-trigger this handler
+  wrapper.addEventListener('animationend', () => {
+    wrapper.classList.add('pop_anim');
+    count.classList.add('count_pop_anim');
+  }, {once: true});
+
+  spaceElement.appendChild(wrapper);
+  return {wrapper, count};
 }
 
-function speak(message: string) {
-  if (noTts) return;
-  const utterance = new SpeechSynthesisUtterance(message);
-  utterance.volume = ttsVolume;
-  utterance.rate = ttsRate;
-  utterance.pitch = ttsPitch;
-  speechSynthesis.speak(utterance);
+function handleRepeatedMessage(message: string, repeatData: RepeatData) {
+  if (repeatData.elements == null) {
+    repeatData.elements = createRepeatElements(message);
+    speak(message);
+  } else if (!noRepeating && repeatData.count % minRepeatCount == 0) {
+    speak(message);
+  }
+
+  const {wrapper, count} = repeatData.elements;
+  // Don't need a space before the 'x', added in insertEmotes()
+  count.textContent = 'x' + repeatData.count.toString();
+  wrapper.classList.remove('pop_anim');
+  count.classList.remove('count_pop_anim');
+  void wrapper.offsetWidth; // Force a reflow so the animations restart
+  wrapper.classList.add('pop_anim');
+  count.classList.add('count_pop_anim');
 }

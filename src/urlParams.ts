@@ -5,125 +5,68 @@ export const colorToRgb: Record<string, string> = {
   'yellow': 'rgb(226, 226, 66)',
   'green' : 'rgb(81, 228, 98)' ,
   'blue'  : 'rgb(98, 81, 228)' ,
-  'purple': 'rgb(98, 81, 228)' ,
+  'purple': 'rgb(163, 81, 228)',
 };
 
-export function getURLParams() {
-  
-  // Initialize parameters as default values
-  let channel: string | null;     // channel
-  let color           = 'yellow'; // color
-  let fontSize        = 30.0;     // fontsize
-  let emoteScale      = 1.3;      // emotescale
-  let minRepeatCount  = 3;        // min
-  let repeatDuration  = 7.0;      // dur
-  let windowWidth     = 800;      // width
-  let windowHeight    = 600;      // height
-  let ttsVolume       = 0.5;      // vol
-  let ttsRate         = 0.8;      // rate
-  let ttsPitch        = 2.0;      // pitch
-  let noTts           = false;    // notts
-  let noRepeating     = false;    // norepeat
-  let isTopDown       = false;    // topdown
-  let isRightSide     = false;    // rightside
-  let noBttv          = false;    // noBttv
-  let noFfz           = false;    // noFfz
-  let no7tv           = false;    // no7tv
-  let debugMode       = false;    // debug
+const isPositive    = (n: number) => n > 0;
+const isNonNegative = (n: number) => n >= 0;
+const clamp = (n: number, min: number, max: number) => Math.min(Math.max(n, min), max);
 
-  // Parse URL parameters
+export function getURLParams() {
   const urlParams = new URLSearchParams(window.location.search);
 
-  channel = urlParams.get('channel');
-  if (channel) channel = channel.toLowerCase();
+  // Falls back to the default when the parameter is absent or fails isValid()
+  const num = (
+    name: string,
+    fallback: number,
+    isValid: (n: number) => boolean = Number.isFinite,
+    parse: (s: string) => number = parseFloat,
+  ) => {
+    const raw = urlParams.get(name);
+    if (!raw) return fallback;
+    const value = parse(raw);
+    return isValid(value) ? value : fallback;
+  };
 
-  const colorStr = urlParams.get('color');
-  if (colorStr) {
-    if (colorStr in colorToRgb) color = colorStr;
-  }
+  const int = (name: string, fallback: number, isValid?: (n: number) => boolean) =>
+    num(name, fallback, isValid, (s) => parseInt(s, 10));
 
-  const fontSizeStr = urlParams.get('fontsize');
-  if (fontSizeStr) {
-    const fontSizeParsed = parseFloat(fontSizeStr);
-    if (!isNaN(fontSizeParsed) && fontSizeParsed > 0) fontSize = fontSizeParsed;
-  }
+  // Present without a value counts as true e.g. "&topdown" == "&topdown=true"
+  const flag = (name: string) => urlParams.has(name) && urlParams.get(name) !== 'false';
 
-  const emoteScaleStr = urlParams.get('emotescale');
-  if (emoteScaleStr) {
-    const emoteScaleParsed = parseFloat(emoteScaleStr);
-    if (!isNaN(emoteScaleParsed) && emoteScaleParsed > 0) emoteScale = emoteScaleParsed;
-  }
-
-  const minRepeatCountStr = urlParams.get('min');
-  if (minRepeatCountStr) {
-    const minRepeatCountParsed = parseInt(minRepeatCountStr);
-    if (minRepeatCountParsed >= 2) minRepeatCount = minRepeatCountParsed;
-  }
-
-  const repeatDurationStr = urlParams.get('dur');
-  if (repeatDurationStr) {
-    const repeatDurationParsed = parseFloat(repeatDurationStr);
-    if (!isNaN(repeatDurationParsed) && repeatDurationParsed > 0) repeatDuration = repeatDurationParsed;
-  }
-
-  const windowWidthStr = urlParams.get('width');
-  if (windowWidthStr) {
-    const windowWidthParsed = parseInt(windowWidthStr);
-    if (windowWidthParsed > 0) windowWidth = windowWidthParsed;
-  }
-
-  const windowHeightStr = urlParams.get('height');
-  if (windowHeightStr) {
-    const windowHeightParsed = parseInt(windowHeightStr);
-    if (windowHeightParsed > 0) windowHeight = windowHeightParsed;
-  }
-
-  const ttsVolumeStr = urlParams.get('vol');
-  if (ttsVolumeStr) {
-    const ttsVolParsed = parseFloat(ttsVolumeStr);
-    if (!isNaN(ttsVolParsed) && ttsVolParsed >= 0) ttsVolume = ttsVolParsed;
-  }
-
-  const ttsRateStr = urlParams.get('rate');
-  if (ttsRateStr) {
-    const ttsRateParsed = parseFloat(ttsRateStr);
-    if (!isNaN(ttsRateParsed) && ttsRateParsed > 0) ttsRate = ttsRateParsed;
-  }
-
-  const ttsPitchStr = urlParams.get('pitch');
-  if (ttsPitchStr) {
-    const ttsPitchParsed = parseFloat(ttsPitchStr);
-    if (!isNaN(ttsPitchParsed)) ttsPitch = ttsPitchParsed;
-  }
-
-  noTts       = urlParams.has('notts')     && urlParams.get('notts')     !== 'false';
-  noRepeating = urlParams.has('norepeat')  && urlParams.get('norepeat')  !== 'false';
-  isTopDown   = urlParams.has('topdown')   && urlParams.get('topdown')   !== 'false';
-  isRightSide = urlParams.has('rightside') && urlParams.get('rightside') !== 'false';
-  noBttv      = urlParams.has('nobttv')    && urlParams.get('nobttv')    !== 'false';
-  noFfz       = urlParams.has('noffz')     && urlParams.get('noffz')     !== 'false';
-  no7tv       = urlParams.has('no7tv')     && urlParams.get('no7tv')     !== 'false';
-  debugMode   = urlParams.has('debug')     && urlParams.get('debug')     !== 'false';
+  const channel = urlParams.get('channel');
+  const ignore = urlParams.get('ignore');
+  const color = urlParams.get('color');
+  const voice = urlParams.get('voice');
 
   return {
-    channel,
-    color,
-    fontSize,
-    emoteScale,
-    minRepeatCount,
-    repeatDuration,
-    windowWidth,
-    windowHeight,
-    ttsVolume,
-    ttsRate,
-    ttsPitch,
-    noTts,
-    noRepeating,
-    isTopDown,
-    isRightSide,
-    noBttv,
-    noFfz,
-    no7tv,
-    debugMode,
+    channel: channel && channel.toLowerCase(),
+    // Lower-cased like 'channel', since Twitch logins are case-insensitive.
+    // filter(Boolean) tolerates stray/trailing commas e.g. "ignore=nightbot,"
+    ignoredUsers: new Set(
+      (ignore ?? '').split(',').map((user) => user.trim().toLowerCase()).filter(Boolean),
+    ),
+    color: color && color in colorToRgb ? color : 'yellow',
+    fontSize:       num('fontsize',   30.0, isPositive),
+    emoteScale:     num('emotescale',  1.3, isPositive),
+    minRepeatCount: int('min',           3, (n) => n >= 1),
+    repeatDuration: num('dur',         7.0, isPositive),
+    windowWidth:    int('width',       800, isPositive),
+    windowHeight:   int('height',      600, isPositive),
+    // Clamped rather than rejected, so "vol=2" means "as loud as it goes"
+    ttsVolume:      clamp(num('vol',   0.5, isNonNegative), 0, 1),
+    ttsRate:        clamp(num('rate',  1.0, isPositive), 0.25, 4),
+    // Capitalised because the TTS endpoint is case-sensitive and 401s on anything else,
+    // which would silently kill all speech -- and 'channel' is case-insensitive, so
+    // users reasonably expect the same here
+    ttsVoice:       voice ? voice.charAt(0).toUpperCase() + voice.slice(1).toLowerCase() : 'Brian',
+    noTts:       flag('notts'),
+    noRepeating: flag('norepeat'),
+    isTopDown:   flag('topdown'),
+    isRightSide: flag('rightside'),
+    noBttv:      flag('nobttv'),
+    noFfz:       flag('noffz'),
+    no7tv:       flag('no7tv'),
+    debugMode:   flag('debug'),
   };
 }

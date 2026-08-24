@@ -33,7 +33,7 @@
   align-items: var(--align-items);
   flex-direction: var(--flex-direction);
   color: var(--color);
-  font-family: 'Retro Gaming';
+  font-family: 'Retro Gaming', monospace;
   -webkit-text-stroke: 1px rgb(0, 0, 0);
   font-size: var(--font-size);
 }
