@@ -67,24 +67,30 @@ const activeRepeats: Map<string, RepeatData> = new Map();
 
 // 'yt' wins if both are given, so an existing '?channel=' in the URL can't quietly
 // override a newly added YouTube channel
-const source: ChatSource | null = youtube
-  ? youtubeChat({
-      id: youtube,
-      proxyUrl: youtubeProxy || DEFAULT_PROXY,
-      debugMode,
-      onStatus: (text) => { spaceElement.textContent = text; },
-    })
-  : channel
-  ? twitchChat({channel, noBttv, noFfz, no7tv, debugMode})
-  : null;
+// Both can run at once: they feed the same counter, so a message repeated across a
+// simulcast counts as one combined repeat rather than two separate ones
+const sources: ChatSource[] = [];
+if (channel) sources.push(twitchChat({channel, noBttv, noFfz, no7tv, debugMode}));
+if (youtube) {
+  sources.push(youtubeChat({
+    id: youtube,
+    proxyUrl: youtubeProxy || DEFAULT_PROXY,
+    debugMode,
+    // Status text replaces everything in the overlay, so only write it when nothing
+    // else could have put repeats on screen already
+    onStatus: (text) => { if (sources.length === 1) spaceElement.textContent = text; },
+  }));
+}
 
-if (source == null) {
+if (sources.length === 0) {
   spaceElement.textContent =
     'Add "?channel=CHANNEL" (Twitch) or "?yt=@HANDLE" (YouTube) to the end of the URL. Check GitHub for more arguments and info.';
-} else {
+}
+for (const source of sources) {
   source(onChatMessage).catch((error) => {
     if (debugMode) console.error(error);
-    spaceElement.textContent = 'Could not connect to chat. Check the channel name.';
+    // One platform failing shouldn't blank out the other's repeats
+    if (sources.length === 1) spaceElement.textContent = 'Could not connect to chat. Check the channel name.';
   });
 }
 
