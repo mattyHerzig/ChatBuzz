@@ -53,8 +53,11 @@ const speak = noTts
 
 interface RepeatElements {
   wrapper: HTMLDivElement;
+  message: HTMLSpanElement;
   count: HTMLSpanElement;
 }
+
+const hasEmote = (parts: MessagePart[]) => parts.some((part) => part.type === 'emote');
 interface RepeatData {
   count: number;
   timeout: ReturnType<typeof setTimeout> | null;
@@ -108,6 +111,18 @@ function onChatMessage({username, text, parts}: ChatMessage) {
   let repeatData = activeRepeats.get(key);
   if (repeatData) {
     repeatData.count++;
+    // Simulcasting delivers the same text from both platforms, but only the side whose
+    // emotes resolved carries images. Prefer that rendering however it arrived, otherwise
+    // an emote shows as an image or as plain text depending on which chat was quicker.
+    if (hasEmote(parts) && !hasEmote(repeatData.parts)) {
+      repeatData.parts = parts;
+      const elements = repeatData.elements;
+      if (elements != null) {
+        const message = renderMessage(parts);
+        elements.wrapper.replaceChild(message, elements.message);
+        elements.message = message;
+      }
+    }
   } else {
     repeatData = {count: 1, timeout: null, elements: null, text, parts};
     activeRepeats.set(key, repeatData);
@@ -134,9 +149,10 @@ function createRepeatElements(parts: MessagePart[]): RepeatElements {
   const count = document.createElement('span');
   count.className = 'count';
 
+  const message = renderMessage(parts);
   const wrapper = document.createElement('div');
   wrapper.className = 'repeat_wrapper spawn_anim';
-  wrapper.appendChild(renderMessage(parts));
+  wrapper.appendChild(message);
   wrapper.appendChild(count);
   // once: true, otherwise every later pop_anim would re-trigger this handler
   wrapper.addEventListener('animationend', () => {
@@ -145,7 +161,7 @@ function createRepeatElements(parts: MessagePart[]): RepeatElements {
   }, {once: true});
 
   spaceElement.appendChild(wrapper);
-  return {wrapper, count};
+  return {wrapper, message, count};
 }
 
 function handleRepeatedMessage(repeatData: RepeatData) {
