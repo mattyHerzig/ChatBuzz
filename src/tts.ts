@@ -1,7 +1,6 @@
-// StreamElements' public TTS endpoint. Unlike SpeechSynthesis -- which the OS renders
-// outside the browser, so OBS can neither capture nor route it (obs-browser#404) --
-// this returns MP3 bytes we play in-page, inside the audio pipeline OBS records from.
-// It also means every viewer hears the same voice regardless of their OS locale.
+// Unlike SpeechSynthesis -- which the OS renders outside the browser, so OBS can neither
+// capture nor route it (obs-browser#404) -- this returns MP3 bytes we play in-page, inside
+// the pipeline OBS records from, with the same voice regardless of the viewer's OS locale.
 const TTS_ENDPOINT = 'https://api.streamelements.com/kappa/v2/speech';
 
 // Chat spam can outrun playback; drop the oldest rather than fall minutes behind.
@@ -14,7 +13,7 @@ export interface TtsConfig {
   debugMode: boolean;
 }
 
-export function createSpeaker(config: TtsConfig) {
+export function createSpeaker({voice, volume, rate, debugMode}: TtsConfig) {
   const queue: string[] = [];
   let current: HTMLAudioElement | null = null;
 
@@ -25,9 +24,9 @@ export function createSpeaker(config: TtsConfig) {
       return;
     }
 
-    const audio = new Audio(`${TTS_ENDPOINT}?voice=${encodeURIComponent(config.voice)}&text=${encodeURIComponent(message)}`);
-    audio.volume = config.volume;
-    audio.playbackRate = config.rate;
+    const audio = new Audio(`${TTS_ENDPOINT}?voice=${encodeURIComponent(voice)}&text=${encodeURIComponent(message)}`);
+    audio.volume = volume;
+    audio.playbackRate = rate;
     current = audio;
 
     // 'ended', 'error' and a rejected play() overlap; only the first one advances
@@ -35,7 +34,7 @@ export function createSpeaker(config: TtsConfig) {
     const advance = (error?: unknown) => {
       if (advanced) return;
       advanced = true;
-      if (error != null && config.debugMode) console.error('TTS playback failed', error);
+      if (error != null && debugMode) console.error('TTS playback failed', error);
       playNext();
     };
 
