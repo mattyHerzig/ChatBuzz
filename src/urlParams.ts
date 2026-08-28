@@ -43,7 +43,10 @@ export function getURLParams() {
   const voice = urlParams.get('voice');
 
   return {
-    channel: channel && channel.toLowerCase(),
+    // A leading '@' is stripped here, accepted by the worker for 'youtube', and stripped
+    // from 'ignore' -- so it is optional everywhere rather than silently breaking one
+    // parameter. Twitch would otherwise try to join "#@name" and receive nothing at all.
+    channel: channel && channel.toLowerCase().replace(/^@/, ''),
     // A @handle or a UC... channel id. Case is preserved: unlike Twitch logins, both
     // YouTube forms are case-sensitive.
     youtube: youtube && youtube.trim(),

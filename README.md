@@ -14,13 +14,13 @@ ChatBuzz is a simple OBS Plugin that displays repeated messages from a Twitch or
 ## URL Parameters
 I've configured ChatBuzz so that its width and height are the same as the OBS Browser Source's default, 800x600. Because of this, it's as simple as putting in the URL and clicking "OK".
 
-Your OBS Browser Source URL should look like "https://chatbuzz.app/?twitch=CHANNEL", with CHANNEL being replaced by your Twitch channel's username (case insensitive). For YouTube, use "https://chatbuzz.app/?youtube=@HANDLE" instead, with @HANDLE being your channel's handle or its "UC..." channel ID. Either way the URL stays the same from stream to stream. If you simulcast, pass both at once and the two chats are counted together, so the same message repeated in either one adds to a single repeat. In addition, you can also add how ever many arguments to the end as you need, in any order, in the form '&PARAMETER=ARGUMENT'. For example, you may have "https://chatbuzz.app/?twitch=xqc&notts&min=5&dur=10.5&color=red".
+Your OBS Browser Source URL should look like "https://chatbuzz.app/?twitch=CHANNEL", with CHANNEL being replaced by your Twitch channel's username (case insensitive). For YouTube, use "https://chatbuzz.app/?youtube=HANDLE" instead, with HANDLE being your channel's handle or its "UC..." channel ID. Either way the URL stays the same from stream to stream. If you simulcast, pass both at once and the two chats are counted together, so the same message repeated in either one adds to a single repeat. In addition, you can also add how ever many arguments to the end as you need, in any order, in the form '&PARAMETER=ARGUMENT'. For example, you may have "https://chatbuzz.app/?twitch=xqc&notts&min=5&dur=10.5&color=red".
 
 ### Table of Parameters
 | Parameter  | Definition                                                                                                                                    | Data Type | Constraints                                                | Default Value |
 |------------|-----------------------------------------------------------------------------------------------------------------------------------------------|-----------|------------------------------------------------------------|---------------|
 | twitch     | Twitch channel username. Also accepted as "channel"                                                                                           | string    | -                                                          | -             |
-| youtube    | YouTube channel name, @handle or "UC..." ID. Can be combined with twitch; waits and connects on its own if you aren't live yet | string    | -                                                          | -             |
+| youtube    | YouTube channel name, handle or "UC..." ID. Can be combined with twitch; waits and connects on its own if you aren't live yet | string    | -                                                          | -             |
 | ignore     | Usernames to ignore entirely, comma separated e.g. "nightbot,streamelements". Their messages don't count towards repeats at all (case insensitive)   | string    | -                                                          | -             |
 | color      | Repeat font color                                                                                                                             | string    | pink \| red \| orange \| yellow \| green \| blue \| purple | yellow        |
 | fontsize   | Repeat font size                                                                                                                              | float     | > 0.0                                                      | 30.0          |
@@ -45,7 +45,9 @@ Your OBS Browser Source URL should look like "https://chatbuzz.app/?twitch=CHANN
 
 Text-To-Speech audio comes from Google Translate, so it needs an internet connection. Ad blockers and privacy extensions sometimes block that domain, which silences speech in a normal browser tab - OBS browser sources have no extensions, so they are unaffected. It offers one voice per language rather than named voices, and long messages are cut off at around 190 characters.
 
-On Twitch, `ignore` matches the account's permanent username. YouTube has no equivalent, so there it matches the @handle shown in chat, which anyone can change — treat it as best effort. Write the name with or without the leading "@"; both work on either platform.
+A leading "@" is optional everywhere — `twitch`, `youtube` and `ignore` all accept a name with or without it. For `youtube` it also forces the value to be read as a handle rather than a "UC..." channel ID, which only matters in the unlikely case that a handle looks like one.
+
+On Twitch, `ignore` matches the account's permanent username. YouTube has no equivalent, so there it matches the handle shown in chat, which anyone can change — treat it as best effort.
 
 YouTube chat comes through a small Cloudflare Worker (`worker/`), because YouTube, unlike Twitch, doesn't let a browser read live chat directly. Nothing to set up to use it. If you fork ChatBuzz and run your own, point at it with `&youtubeproxy=YOUR_WORKER_URL`.
 
