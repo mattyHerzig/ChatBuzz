@@ -45,19 +45,27 @@ const ytFetch = (url, init = {}) =>
  * pause between. Never parse a stripped one: its first "videoId" is some other video
  * entirely, so it yields a confidently wrong answer rather than an obvious failure.
  *
- * Kept low deliberately. Each attempt pulls a ~1MB page, and hammering 8x per request while
- * the client retried every 5s was itself provoking the throttling it was trying to survive.
+ * Throttling arrives in bursts, so spacing the attempts matters more than their number.
+ * This was once 8 attempts with no caching and a client retrying every 5s -- roughly 96
+ * page fetches a minute, which provoked the very throttling it was trying to survive. With
+ * successful resolves now cached for 5 minutes a channel needs at most one cold resolve in
+ * that window, so a handful of well-spaced attempts is cheap.
  */
-async function ytFetchPage(url, isUsable, attempts = 3) {
+async function ytFetchPage(url, isUsable, attempts = 6) {
   let html = '';
+  let status = 0;
   for (let i = 0; i < attempts; i++) {
-    if (i) await new Promise((r) => setTimeout(r, 250));
+    if (i) await new Promise((r) => setTimeout(r, 600));
     const res = await ytFetch(url);
+    status = res.status;
+    // A missing channel is permanent -- retrying it is pointless, and reporting it as
+    // throttling left the overlay saying "Connecting…" forever over a simple typo
+    if (status === 404) return {html: '', status};
     if (!res.ok) continue;
     html = await res.text();
-    if (isUsable(html)) return html;
+    if (isUsable(html)) return {html, status};
   }
-  return html;
+  return {html, status};
 }
 
 // A browser IP gets `window["ytInitialData"]`, a datacenter IP `var ytInitialData`.
@@ -152,7 +160,8 @@ async function resolve(rawId, ctx) {
   if (cached) return cached;
 
   const path = id.startsWith('@') ? id : `channel/${id}`;
-  const html = await ytFetchPage(`https://www.youtube.com/${path}/live`, isFullPage);
+  const {html, status} = await ytFetchPage(`https://www.youtube.com/${path}/live`, isFullPage);
+  if (status === 404) return json({error: `no YouTube channel called "${id}"`, retry: false}, 404);
   // Never got a usable page, so the live state is unknown. Saying "offline" here would be a
   // confident wrong answer for a channel that is streaming; the client retries this quickly.
   if (!isFullPage(html)) return json({error: 'youtube is throttling this proxy', retry: true}, 503);
@@ -164,11 +173,11 @@ async function resolve(rawId, ctx) {
 
   const key = match(html, /"INNERTUBE_API_KEY":"([^"]+)"/);
   const clientVersion = match(html, /"INNERTUBE_CLIENT_VERSION":"([^"]+)"/);
-  const chatHtml = await ytFetchPage(
+  const chat = await ytFetchPage(
     `https://www.youtube.com/live_chat?v=${videoId}`,
     (page) => Boolean(extractInitialData(page)),
   );
-  const continuation = chatHtml && liveChatContinuation(chatHtml);
+  const continuation = chat.html && liveChatContinuation(chat.html);
 
   // Getting here means YouTube changed its markup: redeploy with updated patterns
   if (!key || !clientVersion || !continuation) return json({error: 'could not parse YouTube page', retry: true}, 502);

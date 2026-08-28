@@ -5,10 +5,11 @@ import { ChatSource } from './chat';
 export const DEFAULT_PROXY = 'https://chatbuzz-yt.mattyherzig.workers.dev';
 
 const OFFLINE_RETRY_MS = 30_000;
-// A proxy error means the live state is unknown rather than offline, so recheck sooner --
-// but back off if it keeps failing, since retrying hard is what provokes YouTube's
-// throttling in the first place
-const ERROR_RETRY_MS = 5_000;
+// A proxy error means the live state is unknown rather than offline, so recheck sooner.
+// The first retry is quick because a cold resolve is throttled maybe a quarter of the time
+// and usually succeeds on the next try -- waiting 5s there just looked broken. It still
+// backs off hard if failures persist, since hammering is what provokes the throttling.
+const ERROR_RETRY_MS = 1_500;
 const MAX_ERROR_RETRY_MS = 40_000;
 // YouTube suggests ~10s between polls, but that is only a hint and polling faster really
 // does return fresher messages: median message age measured 4.5s at its suggested interval
