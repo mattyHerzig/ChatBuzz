@@ -67,6 +67,9 @@ export function youtubeChat({id, proxyUrl, debugMode, onStatus}: YouTubeOptions)
       onStatus('');
 
       let next: string | null = continuation;
+      // A single failed poll is usually a blip; re-resolving on the first one caused
+      // needless reconnects, so retry once before giving up on this session
+      let pollFailures = 0;
       // The first response replays chat history -- measured at 75 messages against 1-5 for
       // later polls -- so counting it would spawn a wall of bogus repeats
       let isFirstPoll = true;
@@ -77,7 +80,12 @@ export function youtubeChat({id, proxyUrl, debugMode, onStatus}: YouTubeOptions)
           headers: {'Content-Type': 'application/json'},
           body: JSON.stringify({continuation: next, key, clientVersion}),
         });
-        if (!data || data.error) break;
+        if (!data || data.error) {
+          if (++pollFailures >= 2) break;
+          await delay(1000);
+          continue;
+        }
+        pollFailures = 0;
 
         const interval = Math.min(data.timeoutMs || 5000, MAX_POLL_INTERVAL_MS);
         const startedAt = Date.now();

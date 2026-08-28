@@ -78,9 +78,14 @@ if (youtube) {
     id: youtube,
     proxyUrl: youtubeProxy || DEFAULT_PROXY,
     debugMode,
-    // Status text replaces everything in the overlay, so only write it when nothing
-    // else could have put repeats on screen already
-    onStatus: (text) => { if (sources.length === 1) spaceElement.textContent = text; },
+    // Writing status replaces the overlay's contents, so only do it when there is nothing
+    // to lose: not while Twitch may have drawn repeats, and not while repeats are on
+    // screen. A brief reconnect mid-stream must not wipe what the viewer is looking at.
+    onStatus: (text) => {
+      if (sources.length === 1 && spaceElement.childElementCount === 0) {
+        spaceElement.textContent = text;
+      }
+    },
   }));
 }
 
