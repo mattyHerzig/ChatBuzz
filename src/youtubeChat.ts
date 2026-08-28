@@ -82,7 +82,7 @@ export function youtubeChat({id, proxyUrl, debugMode, onStatus}: YouTubeOptions)
           body: JSON.stringify({continuation: next, key, clientVersion}),
         });
         if (!data || data.error) {
-          if (++pollFailures >= 2) break;
+          if (++pollFailures >= 3) break;
           await delay(1000);
           continue;
         }
@@ -103,8 +103,9 @@ export function youtubeChat({id, proxyUrl, debugMode, onStatus}: YouTubeOptions)
               await delay(Math.min(Math.max(sentAt - previousSentAt, 0), interval));
             }
             previousSentAt = sentAt;
-            // YouTube has no stable login name, only a changeable display name
-            onMessage({username: (author || '').toLowerCase(), text, parts});
+            // YouTube has no stable login name, only a changeable display name, and reports
+            // it as "@handle" -- strip the '@' so `ignore` matches the same way as on Twitch
+            onMessage({username: (author || '').toLowerCase().replace(/^@/, ''), text, parts});
           }
         }
 

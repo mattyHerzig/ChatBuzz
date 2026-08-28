@@ -48,10 +48,12 @@ export function getURLParams() {
     // YouTube forms are case-sensitive.
     youtube: youtube && youtube.trim(),
     youtubeProxy: urlParams.get('youtubeproxy'),
-    // Lower-cased like 'channel', since Twitch logins are case-insensitive.
-    // filter(Boolean) tolerates stray/trailing commas e.g. "ignore=nightbot,"
+    // Lower-cased like 'channel', since Twitch logins are case-insensitive. The leading '@'
+    // is stripped because YouTube reports authors as "@handle" while Twitch does not, so
+    // "ignore=nightbot" should match on either platform. filter(Boolean) tolerates stray
+    // and trailing commas e.g. "ignore=nightbot,"
     ignoredUsers: new Set(
-      (ignore ?? '').split(',').map((user) => user.trim().toLowerCase()).filter(Boolean),
+      (ignore ?? '').split(',').map((user) => user.trim().toLowerCase().replace(/^@/, '')).filter(Boolean),
     ),
     color: color && color in colorToRgb ? color : 'yellow',
     fontSize:       num('fontsize',   30.0, isPositive),
