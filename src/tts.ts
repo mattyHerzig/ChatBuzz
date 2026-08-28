@@ -46,7 +46,11 @@ export function createSpeaker({language, volume, rate, debugMode}: TtsConfig) {
     const advance = (error?: unknown) => {
       if (advanced) return;
       advanced = true;
-      if (error != null && debugMode) console.error('TTS playback failed', error);
+      // Named explicitly: a content blocker blocking translate.google.com looks identical
+      // to a broken build, and the bare MediaError says nothing useful
+      if (error != null && debugMode) {
+        console.error('TTS playback failed - if this repeats, an ad blocker or privacy extension may be blocking translate.google.com', error);
+      }
       playNext();
     };
 

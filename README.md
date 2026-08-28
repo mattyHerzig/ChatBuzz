@@ -43,7 +43,7 @@ Your OBS Browser Source URL should look like "https://chatbuzz.app/?twitch=CHANN
 | debug      | Debug mode                                                                                                                                    | bool*     | -                                                          | false         |
 
 
-Text-To-Speech audio comes from Google Translate, so it needs an internet connection. It offers one voice per language rather than named voices, and long messages are cut off at around 190 characters.
+Text-To-Speech audio comes from Google Translate, so it needs an internet connection. Ad blockers and privacy extensions sometimes block that domain, which silences speech in a normal browser tab - OBS browser sources have no extensions, so they are unaffected. It offers one voice per language rather than named voices, and long messages are cut off at around 190 characters.
 
 On Twitch, `ignore` matches the account's permanent username. YouTube has no equivalent, so there it matches the display name shown in chat, which anyone can change — treat it as best effort.
 
