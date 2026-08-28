@@ -29,7 +29,7 @@ Your OBS Browser Source URL should look like "https://chatbuzz.app/?twitch=CHANN
 | dur        | Duration (in seconds) until a repeat expires without new identical messages                                                                   | float     | > 0.0                                                      | 7.0           |
 | width      | Window width                                                                                                                                  | int       | > 0                                                        | 800           |
 | height     | Window height                                                                                                                                 | int       | > 0                                                        | 600           |
-| voice      | Text-To-Speech voice (case insensitive). Falls back to Brian if it isn't available                                             | string    | Brian \| Amy \| Emma \| Joanna \| Salli \| Joey \| Justin \| Matthew \| Nicole \| Geraint, among others | Brian         |
+| voice      | Text-To-Speech accent, as a language code e.g. "en", "en-GB", "en-AU", "fr". Unknown values fall back to "en" | string    | any Google Translate language code                         | en            |
 | vol        | Text-To-Speech volume                                                                                                                         | float     | clamped to 0.0-1.0                                         | 0.5           |
 | rate       | Text-To-Speech playback rate                                                                                                                  | float     | clamped to 0.25-4.0                                        | 1.0           |
 | nocase     | Ignore capitalisation when matching repeats, so "LOL" and "lol" count together. The first spelling seen is the one shown | bool*     | -                                                          | false         |
@@ -43,7 +43,7 @@ Your OBS Browser Source URL should look like "https://chatbuzz.app/?twitch=CHANN
 | debug      | Debug mode                                                                                                                                    | bool*     | -                                                          | false         |
 
 
-Text-To-Speech audio is served by StreamElements, so it needs an internet connection. Which voices it accepts changes over time, so if one stops working ChatBuzz falls back to Brian rather than going silent.
+Text-To-Speech audio comes from Google Translate, so it needs an internet connection. It offers one voice per language rather than named voices, and long messages are cut off at around 190 characters.
 
 On Twitch, `ignore` matches the account's permanent username. YouTube has no equivalent, so there it matches the display name shown in chat, which anyone can change — treat it as best effort.
 

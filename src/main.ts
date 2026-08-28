@@ -20,7 +20,7 @@ const {
   windowHeight,
   ttsVolume,
   ttsRate,
-  ttsVoice,
+  ttsLanguage,
   noTts,
   noRepeating,
   isTopDown,
@@ -49,7 +49,7 @@ const spaceElement = document.getElementById('space')!;
 
 const speak = noTts
   ? () => {}
-  : createSpeaker({voice: ttsVoice, volume: ttsVolume, rate: ttsRate, debugMode});
+  : createSpeaker({language: ttsLanguage, volume: ttsVolume, rate: ttsRate, debugMode});
 
 interface RepeatElements {
   wrapper: HTMLDivElement;

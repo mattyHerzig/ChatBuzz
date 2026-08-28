@@ -3,6 +3,11 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
+    <!-- Google's TTS endpoint 404s any request carrying an external Referer, and a media
+         element has no per-element referrerPolicy, so this page-level policy is what makes
+         Text-To-Speech work at all. Verified in-browser: with it audio loads, without it
+         the <audio> element fails with code 4. -->
+    <meta name="referrer" content="no-referrer">
     <title>ChatBuzz</title>
     <link rel="apple-touch-icon" sizes="180x180" href="./assets/favicon/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="./assets/favicon/favicon-32x32.png">

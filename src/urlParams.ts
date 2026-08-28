@@ -63,10 +63,12 @@ export function getURLParams() {
     // Clamped rather than rejected, so "vol=2" means "as loud as it goes"
     ttsVolume:      clamp(num('vol',   0.5, isNonNegative), 0, 1),
     ttsRate:        clamp(num('rate',  1.0, isPositive), 0.25, 4),
-    // Capitalised because the TTS endpoint is case-sensitive and 401s on anything else,
-    // which would silently kill all speech -- and 'channel' is case-insensitive, so
-    // users reasonably expect the same here
-    ttsVoice:       voice ? voice.charAt(0).toUpperCase() + voice.slice(1).toLowerCase() : 'Brian',
+    // A language tag now picks the accent ('en', 'en-GB', 'fr'). Anything else -- including
+    // the old named voices like 'Brian' -- would make the endpoint 404 and kill all speech,
+    // so unrecognised values quietly become 'en'.
+    ttsLanguage:    /^[A-Za-z]{2}(-[A-Za-z]{2})?$/.test(voice || '')
+      ? voice!.slice(0, 2).toLowerCase() + (voice!.length > 2 ? '-' + voice!.slice(3).toUpperCase() : '')
+      : 'en',
     // Repeats are matched on the exact text; 'nocase' folds "LOL" and "lol" together
     noCase:      flag('nocase'),
     noTts:       flag('notts'),
