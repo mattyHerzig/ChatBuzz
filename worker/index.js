@@ -118,14 +118,12 @@ function liveChatContinuation(html) {
 }
 
 /**
- * Accepts what a streamer actually has to hand: a handle, a bare channel name, a UC... id,
- * or a pasted channel URL. Non-technical users type their name without the '@' and paste
- * the whole URL, and rejecting those looked identical to "you aren't live".
+ * Accepts a handle, a bare channel name, or a UC... id. The bare name matters: a streamer
+ * reported being stuck because they typed their name without the '@', which used to be
+ * rejected in a way that looked identical to "you aren't live".
  */
 function normaliseId(raw) {
   let id = (raw || '').trim();
-  const fromUrl = id.match(/youtube\.com\/(?:channel\/|c\/|user\/)?(@?[A-Za-z0-9._-]+)/i);
-  if (fromUrl) id = fromUrl[1];
   if (CHANNEL_ID.test(id)) return id;   // UC ids are case-sensitive
   if (!id.startsWith('@')) id = '@' + id;
   // Handles are not, so folding them means every spelling shares one cache entry
