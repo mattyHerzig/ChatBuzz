@@ -5,8 +5,11 @@ import { ChatSource } from './chat';
 export const DEFAULT_PROXY = 'https://chatbuzz-yt.mattyherzig.workers.dev';
 
 const OFFLINE_RETRY_MS = 30_000;
-// A proxy error means the live state is unknown rather than offline, so recheck sooner
+// A proxy error means the live state is unknown rather than offline, so recheck sooner --
+// but back off if it keeps failing, since retrying hard is what provokes YouTube's
+// throttling in the first place
 const ERROR_RETRY_MS = 5_000;
+const MAX_ERROR_RETRY_MS = 40_000;
 // YouTube suggests ~10s between polls, but that is only a hint and polling faster really
 // does return fresher messages: median message age measured 4.5s at its suggested interval
 // against 2.7s at 2s, worst case 10.1s against 3.2s. Momentary repeats are the whole point
@@ -36,6 +39,7 @@ export function youtubeChat({id, proxyUrl, debugMode, onStatus}: YouTubeOptions)
 
   /** Waits for the channel to be live, so OBS can be opened before the stream starts. */
   async function resolveWhenLive() {
+    let errorWait = ERROR_RETRY_MS;
     for (;;) {
       const data = await request(`/resolve?id=${encodeURIComponent(id)}`);
       if (data?.live) return data;
@@ -43,14 +47,17 @@ export function youtubeChat({id, proxyUrl, debugMode, onStatus}: YouTubeOptions)
 
       // Every failure used to read "waiting to go live", so a mistyped channel looked
       // exactly like a channel that simply hadn't started yet
+      const failed = !data || Boolean(data.error);
       if (data?.retry === false) {
         onStatus(`Can't find the YouTube channel "${id}" - check the name`);
-      } else if (data?.error || !data) {
+      } else if (failed) {
         onStatus(`Connecting to YouTube…`);
       } else {
         onStatus(`Waiting for ${id} to go live…`);
       }
-      await delay(data && !data.error ? OFFLINE_RETRY_MS : ERROR_RETRY_MS);
+
+      await delay(failed ? errorWait : OFFLINE_RETRY_MS);
+      errorWait = failed ? Math.min(errorWait * 2, MAX_ERROR_RETRY_MS) : ERROR_RETRY_MS;
     }
   }
 

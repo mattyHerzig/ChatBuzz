@@ -41,12 +41,14 @@ const ytFetch = (url, init = {}) =>
   fetch(url, {...init, headers: {...BROWSER_HEADERS, ...(init.headers || {})}});
 
 /**
- * Even with browser headers YouTube intermittently returns a stripped page, in bursts, so
- * retry with a pause between. Never parse a stripped one: its first "videoId" is some other
- * video entirely, so it yields a confidently wrong answer rather than an obvious failure.
- * Only /resolve pays this, once per stream.
+ * Even with browser headers YouTube intermittently returns a stripped page, so retry with a
+ * pause between. Never parse a stripped one: its first "videoId" is some other video
+ * entirely, so it yields a confidently wrong answer rather than an obvious failure.
+ *
+ * Kept low deliberately. Each attempt pulls a ~1MB page, and hammering 8x per request while
+ * the client retried every 5s was itself provoking the throttling it was trying to survive.
  */
-async function ytFetchPage(url, isUsable, attempts = 8) {
+async function ytFetchPage(url, isUsable, attempts = 3) {
   let html = '';
   for (let i = 0; i < attempts; i++) {
     if (i) await new Promise((r) => setTimeout(r, 250));
@@ -124,15 +126,32 @@ function normaliseId(raw) {
   let id = (raw || '').trim();
   const fromUrl = id.match(/youtube\.com\/(?:channel\/|c\/|user\/)?(@?[A-Za-z0-9._-]+)/i);
   if (fromUrl) id = fromUrl[1];
-  if (CHANNEL_ID.test(id)) return id;
+  if (CHANNEL_ID.test(id)) return id;   // UC ids are case-sensitive
   if (!id.startsWith('@')) id = '@' + id;
+  // Handles are not, so folding them means every spelling shares one cache entry
+  id = id.toLowerCase();
   return HANDLE.test(id) ? id : null;
 }
 
-async function resolve(rawId) {
+/**
+ * Successful resolves are cached: videoId, key and clientVersion are stable for the whole
+ * stream, so this is what keeps repeat requests and extra viewers from each hammering
+ * YouTube -- the main defence against its throttling.
+ *
+ * The continuation token does go stale, which is harmless: the client discards its first
+ * poll anyway, so an old token just replays backlog nobody sees. If the stream genuinely
+ * ended, polling fails and the client re-resolves.
+ */
+const RESOLVE_TTL = 300;
+
+async function resolve(rawId, ctx) {
   const id = normaliseId(rawId);
   // retry:false tells the client this will never succeed, so it can say so plainly
   if (!id) return json({error: 'not a valid YouTube channel name, handle or ID', retry: false}, 400);
+
+  const cacheKey = new Request(`https://resolve.chatbuzz/${encodeURIComponent(id)}`);
+  const cached = await caches.default.match(cacheKey);
+  if (cached) return cached;
 
   const path = id.startsWith('@') ? id : `channel/${id}`;
   const html = await ytFetchPage(`https://www.youtube.com/${path}/live`, isFullPage);
@@ -155,7 +174,11 @@ async function resolve(rawId) {
 
   // Getting here means YouTube changed its markup: redeploy with updated patterns
   if (!key || !clientVersion || !continuation) return json({error: 'could not parse YouTube page', retry: true}, 502);
-  return json({live: true, videoId, key, clientVersion, continuation});
+
+  const ok = json({live: true, videoId, key, clientVersion, continuation});
+  ok.headers.set('Cache-Control', `max-age=${RESOLVE_TTL}`);
+  if (ctx) ctx.waitUntil(caches.default.put(cacheKey, ok.clone()));
+  return ok;
 }
 
 // TODO: 7TV/BTTV emotes typed in YouTube chat stay as plain text here. Their browser
@@ -231,12 +254,12 @@ async function poll({continuation, key, clientVersion} = {}) {
 }
 
 export default {
-  async fetch(request) {
+  async fetch(request, _env, ctx) {
     if (request.method === 'OPTIONS') return new Response(null, {headers: CORS});
     const url = new URL(request.url);
     try {
       if (url.pathname === '/resolve' && request.method === 'GET') {
-        return await resolve(url.searchParams.get('id'));
+        return await resolve(url.searchParams.get('id'), ctx);
       }
       if (url.pathname === '/poll' && request.method === 'POST') {
         return await poll(await request.json());
