@@ -20,7 +20,7 @@ Your OBS Browser Source URL should look like "https://chatbuzz.app/?twitch=CHANN
 | Parameter  | Definition                                                                                                                                    | Data Type | Constraints                                                | Default Value |
 |------------|-----------------------------------------------------------------------------------------------------------------------------------------------|-----------|------------------------------------------------------------|---------------|
 | twitch     | Twitch channel username. Also accepted as "channel"                                                                                           | string    | -                                                          | -             |
-| youtube    | YouTube channel handle or ID e.g. "@LofiGirl" or "UCSJ4gkVC6NrvII8umztf0Ow". Can be combined with twitch; waits and connects on its own if you aren't live yet | string    | -                                                          | -             |
+| youtube    | YouTube channel name, @handle, "UC..." ID, or a pasted channel URL. Can be combined with twitch; waits and connects on its own if you aren't live yet | string    | -                                                          | -             |
 | ignore     | Usernames to ignore entirely, comma separated e.g. "nightbot,streamelements". Their messages don't count towards repeats at all (case insensitive)   | string    | -                                                          | -             |
 | color      | Repeat font color                                                                                                                             | string    | pink \| red \| orange \| yellow \| green \| blue \| purple | yellow        |
 | fontsize   | Repeat font size                                                                                                                              | float     | > 0.0                                                      | 30.0          |
@@ -29,6 +29,7 @@ Your OBS Browser Source URL should look like "https://chatbuzz.app/?twitch=CHANN
 | dur        | Duration (in seconds) until a repeat expires without new identical messages                                                                   | float     | > 0.0                                                      | 7.0           |
 | width      | Window width                                                                                                                                  | int       | > 0                                                        | 800           |
 | height     | Window height                                                                                                                                 | int       | > 0                                                        | 600           |
+| voice      | Text-To-Speech voice (case insensitive). Falls back to Brian if it isn't available                                             | string    | Brian \| Amy \| Emma \| Joanna \| Salli \| Joey \| Justin \| Matthew \| Nicole \| Geraint, among others | Brian         |
 | vol        | Text-To-Speech volume                                                                                                                         | float     | clamped to 0.0-1.0                                         | 0.5           |
 | rate       | Text-To-Speech playback rate                                                                                                                  | float     | clamped to 0.25-4.0                                        | 1.0           |
 | nocase     | Ignore capitalisation when matching repeats, so "LOL" and "lol" count together. The first spelling seen is the one shown | bool*     | -                                                          | false         |
@@ -41,9 +42,8 @@ Your OBS Browser Source URL should look like "https://chatbuzz.app/?twitch=CHANN
 | no7tv      | Exclude 7TV emotes                                                                                                                            | bool*     | -                                                          | false         |
 | debug      | Debug mode                                                                                                                                    | bool*     | -                                                          | false         |
 
-<!-- | voice      | Text-To-Speech voice (case insensitive)                                                                                                       | string    | Brian \| Amy \| Joanna \| Salli \| Ricardo                   | Brian         | -->
 
-Text-To-Speech audio is served by StreamElements, so it needs an internet connection. If you get no speech, check the voice name first.
+Text-To-Speech audio is served by StreamElements, so it needs an internet connection. Which voices it accepts changes over time, so if one stops working ChatBuzz falls back to Brian rather than going silent.
 
 On Twitch, `ignore` matches the account's permanent username. YouTube has no equivalent, so there it matches the display name shown in chat, which anyone can change — treat it as best effort.
 

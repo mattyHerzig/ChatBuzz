@@ -115,16 +115,30 @@ function liveChatContinuation(html) {
   );
 }
 
-async function resolve(id) {
-  if (!id || (!HANDLE.test(id) && !CHANNEL_ID.test(id))) {
-    return json({error: 'id must be a @handle or a UC... channel id'}, 400);
-  }
+/**
+ * Accepts what a streamer actually has to hand: a handle, a bare channel name, a UC... id,
+ * or a pasted channel URL. Non-technical users type their name without the '@' and paste
+ * the whole URL, and rejecting those looked identical to "you aren't live".
+ */
+function normaliseId(raw) {
+  let id = (raw || '').trim();
+  const fromUrl = id.match(/youtube\.com\/(?:channel\/|c\/|user\/)?(@?[A-Za-z0-9._-]+)/i);
+  if (fromUrl) id = fromUrl[1];
+  if (CHANNEL_ID.test(id)) return id;
+  if (!id.startsWith('@')) id = '@' + id;
+  return HANDLE.test(id) ? id : null;
+}
+
+async function resolve(rawId) {
+  const id = normaliseId(rawId);
+  // retry:false tells the client this will never succeed, so it can say so plainly
+  if (!id) return json({error: 'not a valid YouTube channel name, handle or ID', retry: false}, 400);
 
   const path = id.startsWith('@') ? id : `channel/${id}`;
   const html = await ytFetchPage(`https://www.youtube.com/${path}/live`, isFullPage);
   // Never got a usable page, so the live state is unknown. Saying "offline" here would be a
   // confident wrong answer for a channel that is streaming; the client retries this quickly.
-  if (!isFullPage(html)) return json({error: 'youtube is throttling this proxy'}, 503);
+  if (!isFullPage(html)) return json({error: 'youtube is throttling this proxy', retry: true}, 503);
 
   // An offline channel still returns 200 with a stale videoId for an old upload. Requiring
   // the canonical link *and* isLiveNow avoids silently attaching to that VOD's chat.
@@ -140,7 +154,7 @@ async function resolve(id) {
   const continuation = chatHtml && liveChatContinuation(chatHtml);
 
   // Getting here means YouTube changed its markup: redeploy with updated patterns
-  if (!key || !clientVersion || !continuation) return json({error: 'could not parse YouTube page'}, 502);
+  if (!key || !clientVersion || !continuation) return json({error: 'could not parse YouTube page', retry: true}, 502);
   return json({live: true, videoId, key, clientVersion, continuation});
 }
 

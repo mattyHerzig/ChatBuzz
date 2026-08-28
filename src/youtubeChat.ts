@@ -39,10 +39,18 @@ export function youtubeChat({id, proxyUrl, debugMode, onStatus}: YouTubeOptions)
     for (;;) {
       const data = await request(`/resolve?id=${encodeURIComponent(id)}`);
       if (data?.live) return data;
-      // Keep the "waiting" text during a proxy hiccup; it recovers on its own in seconds
-      onStatus(`Waiting for ${id} to go live…`);
       if (data?.error && debugMode) console.error('YouTube resolve failed', data.error);
-      await delay(data?.error ? ERROR_RETRY_MS : OFFLINE_RETRY_MS);
+
+      // Every failure used to read "waiting to go live", so a mistyped channel looked
+      // exactly like a channel that simply hadn't started yet
+      if (data?.retry === false) {
+        onStatus(`Can't find the YouTube channel "${id}" - check the name`);
+      } else if (data?.error || !data) {
+        onStatus(`Connecting to YouTube…`);
+      } else {
+        onStatus(`Waiting for ${id} to go live…`);
+      }
+      await delay(data && !data.error ? OFFLINE_RETRY_MS : ERROR_RETRY_MS);
     }
   }
 
