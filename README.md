@@ -60,6 +60,8 @@ To ignore someone permanently, use their account ID instead of their name — a 
 ### Text-To-Speech
 Speech comes from Google Translate, so it needs an internet connection. It offers one voice per language rather than named voices, and long messages are cut off at around 190 characters.
 
+If you preview ChatBuzz in a normal browser tab, click the page once before expecting speech — browsers block audio until you interact with the page. OBS is unaffected, so this only applies to testing.
+
 Ad blockers and privacy extensions sometimes block that domain, which silences speech in a normal browser tab. OBS browser sources have no extensions, so they are unaffected.
 
 ## About
