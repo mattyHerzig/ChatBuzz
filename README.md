@@ -14,7 +14,7 @@ ChatBuzz is a simple OBS Plugin that displays repeated messages from a Twitch or
 * [Development](#development)
 
 ## Setup
-ChatBuzz is a Browser Source. Its width and height match the OBS Browser Source default of 800x600, so it is as simple as putting in the URL and clicking "OK".
+ChatBuzz is an OBS Browser Source. Its width and height match the OBS Browser Source default of 800x600, so you can leave the default Width and Height.
 
 Your URL should look like "https://chatbuzz.app/?twitch=CHANNEL", with CHANNEL replaced by your Twitch channel's username. For YouTube, use "https://chatbuzz.app/?youtube=HANDLE" instead, with HANDLE being your channel's handle or its "UC..." channel ID. Either way the URL stays the same from stream to stream, and if you simulcast you can pass both at once — the two chats are counted together, so the same message repeated in either adds to a single repeat.
 
