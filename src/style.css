@@ -5,11 +5,10 @@
 }
 
 :root {
-  --animation-duration-short: 0.1s;
   /* Expiry: shrink, fade and space-collapse all run off this one value, and main.ts
      reads it so the removal timeout cannot drift out of sync. */
   --shrink-duration: 0.25s;
-  --animation-duration-long: 0.2s;
+  --pop-duration: 0.2s;
   
   /* Set by parameters, these are the default values */
   --color: rgb(226, 226, 66);
@@ -70,14 +69,14 @@
 
 
 .pop_anim {
-  animation: Pop var(--animation-duration-long);
+  animation: Pop var(--pop-duration);
   transform-origin: center;
 } @keyframes Pop {
   50% {transform: scale(1.2);}
 }
 
 .count_pop_anim {
-  animation: CountPop var(--animation-duration-long);
+  animation: CountPop var(--pop-duration);
 } @keyframes CountPop {
   50% {color: var(--color);}
 }

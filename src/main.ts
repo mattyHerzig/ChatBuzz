@@ -47,9 +47,16 @@ for (const [name, value] of Object.entries(cssVariables)) {
 
 const spaceElement = document.getElementById('space')!;
 
-// Read from CSS so the removal below cannot drift out of sync with the animation
-const shrinkMs =
-  parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--shrink-duration')) * 1000 || 250;
+// Read from CSS so expiry cleanup cannot drift out of sync with the animation. Warned about
+// rather than silently defaulted: a renamed variable would otherwise desync the two quietly.
+const shrinkMs = (() => {
+  const declared = parseFloat(
+    getComputedStyle(document.documentElement).getPropertyValue('--shrink-duration'),
+  ) * 1000;
+  if (Number.isFinite(declared)) return declared;
+  console.warn('--shrink-duration missing from CSS; falling back to 250ms');
+  return 250;
+})();
 
 const speak = noTts
   ? () => {}
