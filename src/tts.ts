@@ -18,6 +18,12 @@ const MAX_CHARS = 190;
 // to block the queue permanently, so speech stopped until the source was reloaded. These
 // bound how long one clip may hold the queue before it is given up on.
 const STALL_MS = 10_000;
+
+// Google rate-limits (HTTP 429) and an <audio> element cannot see the status, so failures
+// are counted instead. Advancing straight to the next clip on failure turned one 429 into a
+// tight loop that hammered the endpoint and kept it rate-limited; backing off breaks that.
+const RETRY_BASE_MS = 1_000;
+const RETRY_MAX_MS = 30_000;
 const OVERRUN_SLACK_MS = 5_000;
 
 export interface TtsConfig {
@@ -31,6 +37,7 @@ export interface TtsConfig {
 export function createSpeaker({language, volume, rate, debugMode}: TtsConfig) {
   const queue: string[] = [];
   let current: HTMLAudioElement | null = null;
+  let failures = 0;
 
   function playNext() {
     const message = queue.shift();
@@ -59,10 +66,21 @@ export function createSpeaker({language, volume, rate, debugMode}: TtsConfig) {
       if (advanced) return;
       advanced = true;
       clearTimeout(watchdog);
-      if (error != null && debugMode) {
-        console.error('TTS playback failed - if this repeats, an ad blocker or privacy extension may be blocking translate.google.com', error);
+      if (error == null) {
+        failures = 0;
+        playNext();
+        return;
       }
-      playNext();
+
+      failures++;
+      const wait = Math.min(RETRY_BASE_MS * 2 ** (failures - 1), RETRY_MAX_MS);
+      if (debugMode) {
+        console.error(
+          `TTS failed (${failures} in a row), waiting ${wait}ms. Usually rate limiting from ` +
+          'translate.google.com; a content blocker does the same thing.', error);
+      }
+      // current stays set, so speak() keeps queueing rather than starting a parallel clip
+      setTimeout(playNext, wait);
     };
 
     // Nothing has played yet, so only a load stall is possible at this point
