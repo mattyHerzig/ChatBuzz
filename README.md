@@ -62,7 +62,7 @@ ChatBuzz is the first personal project that I can be genuinely be proud of. The 
 
 I appreciate any and all feedback! Have you encountered any issues? Do you want new features e.g. emote-only mode, different font options? Any recommendations? Etc. Thanks for reading!
 
-### Learnings
+<!-- ### Learnings
 - TypeScript (& JavaScript)
 - HTML
 - CSS
@@ -80,3 +80,4 @@ I appreciate any and all feedback! Have you encountered any issues? Do you want 
   - Markdown e.g. this (`README.md`)
 - Making a demo video ([Setup & Demo (click)](#setup--demo-click))
 - Published to obsproject.com [here](https://obsproject.com/forum/resources/chatbuzz.1757/)
+-->
