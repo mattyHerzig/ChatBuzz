@@ -6,6 +6,9 @@
 
 :root {
   --animation-duration-short: 0.1s;
+  /* Expiry: shrink, fade and space-collapse all run off this one value, and main.ts
+     reads it so the removal timeout cannot drift out of sync. */
+  --shrink-duration: 0.25s;
   --animation-duration-long: 0.2s;
   
   /* Set by parameters, these are the default values */
@@ -65,35 +68,31 @@
   color: white;
 }
 
-.spawn_anim {
-  animation-name: Spawn;
-  animation-duration: var(--animation-duration-short);
-  transform-origin: center;
-} @keyframes Spawn {
-  0% {transform: scale(0.5);}
-}
 
 .pop_anim {
-  animation-name: Pop;
-  animation-duration: var(--animation-duration-long);
+  animation: Pop var(--animation-duration-long);
   transform-origin: center;
 } @keyframes Pop {
   50% {transform: scale(1.2);}
 }
 
 .count_pop_anim {
-  animation-name: CountPop;
-  animation-duration: var(--animation-duration-long);
+  animation: CountPop var(--animation-duration-long);
 } @keyframes CountPop {
   50% {color: var(--color);}
 }
 
 .shrink_anim {
-  animation-name: Shrink;
-  animation-duration: var(--animation-duration-short);
-  /* Hold the shrunken size instead of snapping back to full for the frame before removal */
-  animation-fill-mode: forwards;
+  /* One animation drives everything: the shrink, the fade, and the collapse of the space
+     it occupies so the repeats above slide down with it. main.ts sets --shrink-from to the
+     measured height, since height cannot animate from auto. overflow:hidden clips the
+     content to the closing box so it never paints over the repeats moving into its place. */
+  animation: Shrink var(--shrink-duration) linear forwards;
   transform-origin: center;
+  overflow: hidden;
 } @keyframes Shrink {
-  100% {transform: scale(0.5);}
+  from {height: var(--shrink-from);}
+  /* invisible before the box has finished closing, so nothing can overlap */
+  80% {opacity: 0;}
+  to {height: 0; margin: 0; opacity: 0; transform: scale(0);}
 }

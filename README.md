@@ -43,6 +43,8 @@ Your OBS Browser Source URL should look like "https://chatbuzz.app/?twitch=CHANN
 | debug      | Debug mode                                                                                                                                    | bool*     | -                                                          | false         |
 
 
+In OBS, leave the browser source's "Control audio via OBS" box ticked so speech is captured in your stream and recording. With it ticked you will not hear it yourself unless you also turn on monitoring for the source: Audio Mixer → gear icon → Advanced Audio Properties → Audio Monitoring → "Monitor and Output". Unticking the box instead sends speech straight to your speakers, where you can hear it but OBS cannot record it.
+
 Text-To-Speech audio comes from Google Translate, so it needs an internet connection. Ad blockers and privacy extensions sometimes block that domain, which silences speech in a normal browser tab - OBS browser sources have no extensions, so they are unaffected. It offers one voice per language rather than named voices, and long messages are cut off at around 190 characters.
 
 A leading "@" is optional everywhere — `twitch`, `youtube` and `ignore` all accept a name with or without it. For `youtube` it also forces the value to be read as a handle rather than a "UC..." channel ID, which only matters in the unlikely case that a handle looks like one.

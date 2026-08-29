@@ -14,6 +14,12 @@ const MAX_QUEUED = 5;
 // The endpoint 400s past roughly 200 characters, and Twitch allows 500
 const MAX_CHARS = 190;
 
+// A clip that neither ends nor errors -- a stalled request, or OBS suspending media -- used
+// to block the queue permanently, so speech stopped until the source was reloaded. These
+// bound how long one clip may hold the queue before it is given up on.
+const STALL_MS = 10_000;
+const OVERRUN_SLACK_MS = 5_000;
+
 export interface TtsConfig {
   /** BCP-47-ish language tag picking the accent, e.g. 'en', 'en-GB', 'fr' */
   language: string;
@@ -41,18 +47,28 @@ export function createSpeaker({language, volume, rate, debugMode}: TtsConfig) {
     audio.playbackRate = rate;
     current = audio;
 
-    // 'ended', 'error' and a rejected play() overlap; only the first one advances
     let advanced = false;
+    let watchdog: ReturnType<typeof setTimeout>;
+    const arm = (ms: number) => {
+      clearTimeout(watchdog);
+      watchdog = setTimeout(() => advance(new Error(`TTS clip gave up after ${Math.round(ms)}ms`)), ms);
+    };
+
+    // 'ended', 'error', a rejected play() and the watchdog all race; only the first advances
     const advance = (error?: unknown) => {
       if (advanced) return;
       advanced = true;
-      // Named explicitly: a content blocker blocking translate.google.com looks identical
-      // to a broken build, and the bare MediaError says nothing useful
+      clearTimeout(watchdog);
       if (error != null && debugMode) {
         console.error('TTS playback failed - if this repeats, an ad blocker or privacy extension may be blocking translate.google.com', error);
       }
       playNext();
     };
+
+    // Nothing has played yet, so only a load stall is possible at this point
+    arm(STALL_MS);
+    // Once it is genuinely playing, allow its own length before assuming a stall
+    audio.addEventListener('playing', () => arm(((audio.duration || 15) / rate) * 1000 + OVERRUN_SLACK_MS), {once: true});
 
     audio.addEventListener('ended', () => advance(), {once: true});
     // The event firing at all means failure; audio.error isn't always populated

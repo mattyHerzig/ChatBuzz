@@ -47,6 +47,10 @@ for (const [name, value] of Object.entries(cssVariables)) {
 
 const spaceElement = document.getElementById('space')!;
 
+// Read from CSS so the removal below cannot drift out of sync with the animation
+const shrinkMs =
+  parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--shrink-duration')) * 1000 || 250;
+
 const speak = noTts
   ? () => {}
   : createSpeaker({language: ttsLanguage, volume: ttsVolume, rate: ttsRate, debugMode});
@@ -131,36 +135,28 @@ function onChatMessage({username, text, parts}: ChatMessage) {
     repeatData = {count: 1, timeout: null, elements: null, text, parts};
     activeRepeats.set(key, repeatData);
   }
-  restartTimeout(key, repeatData);
+  scheduleExpiry(key, repeatData);
   if (repeatData.count >= minRepeatCount) {
     handleRepeatedMessage(repeatData);
   }
 }
 
-function restartTimeout(message: string, repeatData: RepeatData) {
+function scheduleExpiry(key: string, repeatData: RepeatData) {
   if (repeatData.timeout != null) clearTimeout(repeatData.timeout);
   repeatData.timeout = setTimeout(() => {
-    const elements = repeatData.elements;
-    if (elements != null) {
-      const {wrapper} = elements;
-      wrapper.classList.add('shrink_anim');
-      // animationend bubbles, so a child's animation could swallow a {once:true} listener,
-      // and OBS fires it late -- so a timeout just past the animation drives removal here
-      // and the event is only a fast path. remove() is idempotent.
-      const drop = () => {
-        wrapper.remove();
-        // OBS renders the page offscreen and keeps showing the last painted frame when
-        // nothing is animating, so the shrunken repeat lingered after being removed.
-        // Requesting frames forces the removal to actually be composited.
-        requestAnimationFrame(() => requestAnimationFrame(() => {}));
-      };
-      wrapper.addEventListener('animationend', (event) => {
-        if (event.animationName === 'Shrink') drop();
-      });
-      // --animation-duration-short is 0.1s; +2 frames at 30fps so the shrink still completes
-      setTimeout(drop, 170);
-    }
-    activeRepeats.delete(message);
+    activeRepeats.delete(key);
+    if (repeatData.elements == null) return;
+
+    const {wrapper} = repeatData.elements;
+    // height cannot animate from auto, so hand the animation the measured value
+    wrapper.style.setProperty('--shrink-from', `${wrapper.offsetHeight}px`);
+    wrapper.classList.add('shrink_anim');
+    // Matched by name because animationend bubbles; a child's animation would otherwise
+    // remove this early. The timeout covers OBS not always delivering the event.
+    wrapper.addEventListener('animationend', (event) => {
+      if (event.animationName === 'Shrink') wrapper.remove();
+    });
+    setTimeout(() => wrapper.remove(), shrinkMs + 100);
   }, repeatDuration * 1000);
 }
 
@@ -170,14 +166,9 @@ function createRepeatElements(parts: MessagePart[]): RepeatElements {
 
   const message = renderMessage(parts);
   const wrapper = document.createElement('div');
-  wrapper.className = 'repeat_wrapper spawn_anim';
+  wrapper.className = 'repeat_wrapper';
   wrapper.appendChild(message);
   wrapper.appendChild(count);
-  // once: true, otherwise every later pop_anim would re-trigger this handler
-  wrapper.addEventListener('animationend', () => {
-    wrapper.classList.add('pop_anim');
-    count.classList.add('count_pop_anim');
-  }, {once: true});
 
   spaceElement.appendChild(wrapper);
   return {wrapper, message, count};
