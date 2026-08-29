@@ -148,7 +148,11 @@ function normaliseId(raw) {
  * poll anyway, so an old token just replays backlog nobody sees. If the stream genuinely
  * ended, polling fails and the client re-resolves.
  */
-const RESOLVE_TTL = 300;
+const RESOLVE_FRESH_S = 300;
+// Kept far longer than it is considered fresh, purely so a throttled refresh can fall back
+// to it. YouTube throttles this proxy in bursts, and a stream's videoId and keys do not
+// change, so last hour's answer beats telling the overlay to keep waiting.
+const RESOLVE_KEEP_S = 3600;
 
 async function resolve(rawId, ctx) {
   const id = normaliseId(rawId);
@@ -157,19 +161,35 @@ async function resolve(rawId, ctx) {
 
   const cacheKey = new Request(`https://resolve.chatbuzz/${encodeURIComponent(id)}`);
   const cached = await caches.default.match(cacheKey);
-  if (cached) return cached;
+  let stale = null;
+  if (cached) {
+    const body = await cached.json();
+    if ((Date.now() - (body.cachedAt || 0)) / 1000 < RESOLVE_FRESH_S) return json(body);
+    stale = body;
+  }
 
   const path = id.startsWith('@') ? id : `channel/${id}`;
   const {html, status} = await ytFetchPage(`https://www.youtube.com/${path}/live`, isFullPage);
-  if (status === 404) return json({error: `no YouTube channel called "${id}"`, retry: false}, 404);
+  if (status === 404) {
+    if (ctx) ctx.waitUntil(caches.default.delete(cacheKey));
+    return json({error: `no YouTube channel called "${id}"`, retry: false}, 404);
+  }
   // Never got a usable page, so the live state is unknown. Saying "offline" here would be a
   // confident wrong answer for a channel that is streaming; the client retries this quickly.
-  if (!isFullPage(html)) return json({error: 'youtube is throttling this proxy', retry: true}, 503);
+  // Throttled, so the live state is unknown -- an older answer is far better than none
+  if (!isFullPage(html)) {
+    if (stale) return json({...stale, stale: true});
+    return json({error: 'youtube is throttling this proxy', retry: true}, 503);
+  }
 
   // An offline channel still returns 200 with a stale videoId for an old upload. Requiring
   // the canonical link *and* isLiveNow avoids silently attaching to that VOD's chat.
   const videoId = match(html, /<link rel="canonical" href="https:\/\/www\.youtube\.com\/watch\?v=([\w-]{11})"/);
-  if (!videoId || !/"isLiveNow":true/.test(html)) return json({live: false});
+  // Authoritative: the stream really has ended, so the cached answer must not outlive it
+  if (!videoId || !/"isLiveNow":true/.test(html)) {
+    if (ctx) ctx.waitUntil(caches.default.delete(cacheKey));
+    return json({live: false});
+  }
 
   const key = match(html, /"INNERTUBE_API_KEY":"([^"]+)"/);
   const clientVersion = match(html, /"INNERTUBE_CLIENT_VERSION":"([^"]+)"/);
@@ -182,8 +202,8 @@ async function resolve(rawId, ctx) {
   // Getting here means YouTube changed its markup: redeploy with updated patterns
   if (!key || !clientVersion || !continuation) return json({error: 'could not parse YouTube page', retry: true}, 502);
 
-  const ok = json({live: true, videoId, key, clientVersion, continuation});
-  ok.headers.set('Cache-Control', `max-age=${RESOLVE_TTL}`);
+  const ok = json({live: true, videoId, key, clientVersion, continuation, cachedAt: Date.now()});
+  ok.headers.set('Cache-Control', `max-age=${RESOLVE_KEEP_S}`);
   if (ctx) ctx.waitUntil(caches.default.put(cacheKey, ok.clone()));
   return ok;
 }
