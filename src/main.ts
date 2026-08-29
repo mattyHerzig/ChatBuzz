@@ -116,10 +116,12 @@ for (const source of sources) {
   });
 }
 
-function onChatMessage({username, text, parts}: ChatMessage) {
-  // Skipped before counting, so an ignored user can't push a message to its
-  // repeat threshold or keep an existing repeat alive
+function onChatMessage({username, userId, text, parts}: ChatMessage) {
+  // Skipped before counting, so an ignored user can't push a message to its repeat threshold
+  // or keep an existing repeat alive. Account ids match too, since a YouTube display name is
+  // only ever a best guess -- anyone can change theirs.
   if (username && ignoredUsers.has(username)) return;
+  if (userId && ignoredUsers.has(userId.toLowerCase())) return;
 
   // Emotes are fetched now rather than when the repeat appears, so the images are already
   // cached by the time it does and the layout doesn't jump as they load in

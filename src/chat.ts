@@ -7,6 +7,8 @@ export type MessagePart =
 export interface ChatMessage {
   /** Lower-cased; matched against the `ignore` parameter */
   username: string;
+  /** Platform account id where available: stable when a display name is not */
+  userId?: string;
   /** The repeat-detection key, and what gets spoken */
   text: string;
   /** Emotes already carry their image URL */

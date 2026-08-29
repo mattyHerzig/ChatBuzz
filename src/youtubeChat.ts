@@ -98,14 +98,14 @@ export function youtubeChat({id, proxyUrl, debugMode, onStatus}: YouTubeOptions)
           // real send time. Spacing them evenly instead would invent a rhythm chat never
           // had -- five messages fired off in one second would look five seconds apart.
           let previousSentAt = 0;
-          for (const {author, text, parts, sentAt} of data.messages) {
+          for (const {author, authorId, text, parts, sentAt} of data.messages) {
             if (previousSentAt && sentAt) {
               await delay(Math.min(Math.max(sentAt - previousSentAt, 0), interval));
             }
             previousSentAt = sentAt;
             // YouTube has no stable login name, only a changeable display name, and reports
             // it as "@handle" -- strip the '@' so `ignore` matches the same way as on Twitch
-            onMessage({username: (author || '').toLowerCase().replace(/^@/, ''), text, parts});
+            onMessage({username: (author || '').toLowerCase().replace(/^@/, ''), userId: authorId, text, parts});
           }
         }
 

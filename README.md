@@ -30,7 +30,7 @@ A leading "@" is optional everywhere — `twitch`, `youtube` and `ignore` all ac
 |------------|-----------------------------------------------------------------------------------------------------------------------------------------------|-----------|------------------------------------------------------------|---------------|
 | twitch     | Twitch channel username. Also accepted as "channel"                                                                                           | string    | -                                                          | -             |
 | youtube    | YouTube channel name, handle or "UC..." ID. Can be combined with twitch; waits and connects on its own if you aren't live yet | string    | -                                                          | -             |
-| ignore     | Usernames to ignore entirely, comma separated e.g. "nightbot,streamelements". Their messages don't count towards repeats at all (case insensitive)   | string    | -                                                          | -             |
+| ignore     | Usernames or account IDs to ignore entirely, comma separated e.g. "nightbot,streamelements". Their messages don't count towards repeats at all (case insensitive) | string    | -                                                          | -             |
 | color      | Repeat font color                                                                                                                             | string    | pink \| red \| orange \| yellow \| green \| blue \| purple | yellow        |
 | fontsize   | Repeat font size                                                                                                                              | float     | > 0.0                                                      | 30.0          |
 | emotescale | Emote scale when compared to font size                                                                                                        | float     | > 0.0                                                      | 1.3           |
@@ -53,7 +53,9 @@ A leading "@" is optional everywhere — `twitch`, `youtube` and `ignore` all ac
 
 \* the bool paremeters, nocase–7tv, may be false on default, but I've made it so you don't need to provide "true" for it to be true. Simply include it as an argument e.g. "&topdown&notts" rather than "&topdown=true&notts=true".
 
-On Twitch, `ignore` matches the account's permanent username. YouTube has no equivalent, so there it matches the handle shown in chat, which anyone can change — treat it as best effort.
+On Twitch, `ignore` matches the account's permanent username. YouTube has no equivalent, so there it matches the handle shown in chat, which anyone can change.
+
+To ignore someone permanently, use their account ID instead of their name — a YouTube "UC..." channel ID or a numeric Twitch user ID. IDs never change, so an ignore keeps working even if the person renames themselves.
 
 ### Text-To-Speech
 Speech comes from Google Translate, so it needs an internet connection. It offers one voice per language rather than named voices, and long messages are cut off at around 190 characters.

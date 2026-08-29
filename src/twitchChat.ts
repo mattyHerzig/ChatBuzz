@@ -64,6 +64,7 @@ export function twitchChat({channel, noBttv, noFfz, no7tv, debugMode}: TwitchOpt
     client.on('message', (_channel, tags, message) => {
       onMessage({
         username: (tags.username || '').toLowerCase(),
+        userId: tags['user-id'],
         text: message,
         parts: toParts(message, tags.emotes),
       });

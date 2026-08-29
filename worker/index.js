@@ -246,6 +246,8 @@ async function poll({continuation, key, clientVersion} = {}) {
     if (!parts.length) continue;
     messages.push({
       author: renderer.authorName?.simpleText || '',
+      // Stable, unlike the display name, so `ignore` can survive a rename
+      authorId: renderer.authorExternalChannelId || '',
       // Real send time (ms). Lets the client replay the true gaps between messages
       // instead of inventing an even spread across the poll interval.
       sentAt: Number(renderer.timestampUsec) / 1000 || 0,
