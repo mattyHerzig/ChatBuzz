@@ -71,7 +71,7 @@ export function getEmoteImageUrl(word: string) {
   return null;
 }
 
-const preloaded = new Set<string>();
+const preloaded = new Map<string, HTMLImageElement>();
 
 /**
  * Starts loading a message's emotes into the browser cache. Called for every message, so
@@ -81,9 +81,35 @@ const preloaded = new Set<string>();
 export function preloadEmotes(parts: MessagePart[]) {
   for (const part of parts) {
     if (part.type !== 'emote' || preloaded.has(part.url)) continue;
-    preloaded.add(part.url);
-    new Image().src = part.url;
+    const image = new Image();
+    image.src = part.url;
+    preloaded.set(part.url, image);
   }
+}
+
+/**
+ * Resolves once a message's emotes have loaded, so a repeat can be shown complete instead of
+ * reflowing as its images arrive. Preloading means this is usually already true and resolves
+ * at once; the cap stops a slow image from holding a repeat back for long.
+ */
+export function whenEmotesReady(parts: MessagePart[], capMs = 400): Promise<void> {
+  const pending: HTMLImageElement[] = [];
+  for (const part of parts) {
+    if (part.type !== 'emote') continue;
+    const image = preloaded.get(part.url);
+    if (image && !image.complete) pending.push(image);
+  }
+  if (pending.length === 0) return Promise.resolve();
+
+  return new Promise((resolve) => {
+    let settled = 0;
+    const tick = () => { if (++settled >= pending.length) resolve(); };
+    for (const image of pending) {
+      image.addEventListener('load', tick, {once: true});
+      image.addEventListener('error', tick, {once: true});
+    }
+    setTimeout(resolve, capMs);
+  });
 }
 
 /**

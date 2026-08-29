@@ -1,5 +1,5 @@
 import { getURLParams, colorToRgb } from './urlParams';
-import { renderMessage, preloadEmotes } from './emotes';
+import { renderMessage, preloadEmotes, whenEmotesReady } from './emotes';
 import { createSpeaker } from './tts';
 import { ChatMessage, ChatSource, MessagePart } from './chat';
 import { twitchChat } from './twitchChat';
@@ -68,6 +68,10 @@ interface RepeatData {
   /** First spelling seen; displayed and spoken even when 'nocase' folds later ones in */
   text: string;
   parts: MessagePart[];
+  /** True while waiting on emote images, so we only start that wait once */
+  awaitingEmotes?: boolean;
+  /** Set on expiry, so a wait that finishes afterwards doesn't revive it */
+  expired?: boolean;
 }
 const activeRepeats: Map<string, RepeatData> = new Map();
 
@@ -145,6 +149,7 @@ function scheduleExpiry(key: string, repeatData: RepeatData) {
   if (repeatData.timeout != null) clearTimeout(repeatData.timeout);
   repeatData.timeout = setTimeout(() => {
     activeRepeats.delete(key);
+    repeatData.expired = true;
     if (repeatData.elements == null) return;
 
     const {wrapper} = repeatData.elements;
@@ -176,12 +181,28 @@ function createRepeatElements(parts: MessagePart[]): RepeatElements {
 
 function handleRepeatedMessage(repeatData: RepeatData) {
   if (repeatData.elements == null) {
-    repeatData.elements = createRepeatElements(repeatData.parts);
-    speak(repeatData.text);
-  } else if (!noRepeating && repeatData.count % minRepeatCount == 0) {
-    speak(repeatData.text);
+    // Show it only once its emotes can render, otherwise the images pop in afterwards and
+    // shove the count sideways. Usually already true thanks to preloading, so this resolves
+    // immediately; the count keeps climbing meanwhile and the first paint uses the latest.
+    if (repeatData.awaitingEmotes) return;
+    repeatData.awaitingEmotes = true;
+    void whenEmotesReady(repeatData.parts).then(() => {
+      repeatData.awaitingEmotes = false;
+      if (repeatData.expired) return;
+      repeatData.elements = createRepeatElements(repeatData.parts);
+      speak(repeatData.text);
+      paintCount(repeatData);
+    });
+    return;
   }
 
+  if (!noRepeating && repeatData.count % minRepeatCount == 0) speak(repeatData.text);
+  paintCount(repeatData);
+}
+
+/** Writes the current count and replays the pop on both the wrapper and the counter. */
+function paintCount(repeatData: RepeatData) {
+  if (repeatData.elements == null) return;
   const {wrapper, count} = repeatData.elements;
   // Don't need a space before the 'x', added by renderMessage()
   count.textContent = 'x' + repeatData.count.toString();
