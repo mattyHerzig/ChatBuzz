@@ -142,8 +142,16 @@ function restartTimeout(message: string, repeatData: RepeatData) {
   repeatData.timeout = setTimeout(() => {
     const elements = repeatData.elements;
     if (elements != null) {
-      elements.wrapper.classList.add('shrink_anim');
-      elements.wrapper.addEventListener('animationend', () => elements.wrapper.remove(), {once: true});
+      const {wrapper} = elements;
+      wrapper.classList.add('shrink_anim');
+      // animationend bubbles, so a child's animation could swallow a {once:true} listener,
+      // and OBS can delay the event -- which left the shrunken repeat sitting on screen.
+      // Match the right animation and keep a timeout as a backstop; remove() is idempotent.
+      const drop = () => wrapper.remove();
+      wrapper.addEventListener('animationend', (event) => {
+        if (event.animationName === 'Shrink') drop();
+      });
+      setTimeout(drop, 250);
     }
     activeRepeats.delete(message);
   }, repeatDuration * 1000);

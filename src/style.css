@@ -91,6 +91,8 @@
 .shrink_anim {
   animation-name: Shrink;
   animation-duration: var(--animation-duration-short);
+  /* Hold the shrunken size instead of snapping back to full for the frame before removal */
+  animation-fill-mode: forwards;
   transform-origin: center;
 } @keyframes Shrink {
   100% {transform: scale(0.5);}
