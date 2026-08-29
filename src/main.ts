@@ -145,13 +145,20 @@ function restartTimeout(message: string, repeatData: RepeatData) {
       const {wrapper} = elements;
       wrapper.classList.add('shrink_anim');
       // animationend bubbles, so a child's animation could swallow a {once:true} listener,
-      // and OBS can delay the event -- which left the shrunken repeat sitting on screen.
-      // Match the right animation and keep a timeout as a backstop; remove() is idempotent.
-      const drop = () => wrapper.remove();
+      // and OBS fires it late -- so a timeout just past the animation drives removal here
+      // and the event is only a fast path. remove() is idempotent.
+      const drop = () => {
+        wrapper.remove();
+        // OBS renders the page offscreen and keeps showing the last painted frame when
+        // nothing is animating, so the shrunken repeat lingered after being removed.
+        // Requesting frames forces the removal to actually be composited.
+        requestAnimationFrame(() => requestAnimationFrame(() => {}));
+      };
       wrapper.addEventListener('animationend', (event) => {
         if (event.animationName === 'Shrink') drop();
       });
-      setTimeout(drop, 250);
+      // --animation-duration-short is 0.1s; +2 frames at 30fps so the shrink still completes
+      setTimeout(drop, 170);
     }
     activeRepeats.delete(message);
   }, repeatDuration * 1000);
