@@ -18,7 +18,7 @@ ChatBuzz is a Browser Source. Its width and height match the OBS Browser Source 
 
 Your URL should look like "https://chatbuzz.app/?twitch=CHANNEL", with CHANNEL replaced by your Twitch channel's username. For YouTube, use "https://chatbuzz.app/?youtube=HANDLE" instead, with HANDLE being your channel's handle or its "UC..." channel ID. Either way the URL stays the same from stream to stream, and if you simulcast you can pass both at once — the two chats are counted together, so the same message repeated in either adds to a single repeat.
 
-Leave the browser source's "Control audio via OBS" box ticked so Text-To-Speech is captured in your stream and recording. With it ticked you will not hear it yourself unless you also turn on monitoring for the source: Audio Mixer → gear icon → Advanced Audio Properties → Audio Monitoring → "Monitor and Output". Unticking the box instead sends speech straight to your speakers, where you can hear it but OBS cannot record it.
+Tick the browser source's "Control audio via OBS" box so Text-To-Speech is captured in your stream and recording. With it ticked you will not hear it yourself unless you also turn on monitoring for the source: Audio Mixer → gear icon → Advanced Audio Properties → Audio Monitoring → "Monitor and Output". Unticking the box instead sends speech straight to your speakers, where you can hear it but OBS cannot record it.
 
 ## URL Parameters
 Add how ever many arguments to the end of the URL as you need, in any order, in the form '&PARAMETER=ARGUMENT'. For example, you may have "https://chatbuzz.app/?twitch=xqc&notts&min=5&dur=10.5&color=red".
