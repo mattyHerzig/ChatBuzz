@@ -43,17 +43,17 @@ Your OBS Browser Source URL should look like "https://chatbuzz.app/?twitch=CHANN
 | debug      | Debug mode                                                                                                                                    | bool*     | -                                                          | false         |
 
 
-In OBS, leave the browser source's "Control audio via OBS" box ticked so speech is captured in your stream and recording. With it ticked you will not hear it yourself unless you also turn on monitoring for the source: Audio Mixer → gear icon → Advanced Audio Properties → Audio Monitoring → "Monitor and Output". Unticking the box instead sends speech straight to your speakers, where you can hear it but OBS cannot record it.
-
-Text-To-Speech audio comes from Google Translate, so it needs an internet connection. Ad blockers and privacy extensions sometimes block that domain, which silences speech in a normal browser tab - OBS browser sources have no extensions, so they are unaffected. It offers one voice per language rather than named voices, and long messages are cut off at around 190 characters.
+\* the bool paremeters, nocase–7tv, may be false on default, but I've made it so you don't need to provide "true" for it to be true. Simply include it as an argument e.g. "&topdown&notts" rather than "&topdown=true&notts=true".
 
 A leading "@" is optional everywhere — `twitch`, `youtube` and `ignore` all accept a name with or without it. For `youtube` it also forces the value to be read as a handle rather than a "UC..." channel ID, which only matters in the unlikely case that a handle looks like one.
 
 On Twitch, `ignore` matches the account's permanent username. YouTube has no equivalent, so there it matches the handle shown in chat, which anyone can change — treat it as best effort.
 
-YouTube chat comes through a small Cloudflare Worker (`worker/`), because YouTube, unlike Twitch, doesn't let a browser read live chat directly. Nothing to set up to use it. If you fork ChatBuzz and run your own, point at it with `&youtubeproxy=YOUR_WORKER_URL`.
+In OBS, leave the browser source's "Control audio via OBS" box ticked so speech is captured in your stream and recording. With it ticked you will not hear it yourself unless you also turn on monitoring for the source: Audio Mixer → gear icon → Advanced Audio Properties → Audio Monitoring → "Monitor and Output". Unticking the box instead sends speech straight to your speakers, where you can hear it but OBS cannot record it.
 
-\* the bool paremeters, nocase–7tv, may be false on default, but I've made it so you don't need to provide "true" for it to be true. Simply include it as an argument e.g. "&topdown&notts" rather than "&topdown=true&notts=true".
+Text-To-Speech audio comes from Google Translate, so it needs an internet connection. Ad blockers and privacy extensions sometimes block that domain, which silences speech in a normal browser tab - OBS browser sources have no extensions, so they are unaffected. It offers one voice per language rather than named voices, and long messages are cut off at around 190 characters.
+
+YouTube chat comes through a small Cloudflare Worker (`worker/`), because YouTube, unlike Twitch, doesn't let a browser read live chat directly. Nothing to set up to use it. If you fork ChatBuzz and run your own, point at it with `&youtubeproxy=YOUR_WORKER_URL`.
 
 ## About
 ChatBuzz is the first personal project that I can be genuinely be proud of. The need to create it came about when I wanted to personally use an OBS Plugin with a certain functionality while streaming on Twitch, but I couldn't find any that fit my needs. Specifically, the Twitch streamer Charborg has a similar program that was developed by Cagelight, seen [here](https://www.youtube.com/watch?v=pFehqYehbUA). I took it upon myself to make a free, open-source, public version.
