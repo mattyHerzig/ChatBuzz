@@ -6,15 +6,24 @@ ChatBuzz is a simple OBS Plugin that displays repeated messages from a Twitch or
 
 ## Table of Contents
 * [Setup & Demo (click)](#setup--demo-click)
+* [Setup](#setup)
 * [URL Parameters](#url-parameters)
   * [Table of Parameters](#table-of-parameters)
+  * [Text-To-Speech](#text-to-speech)
 * [About](#about)
-  * [Learnings](#learnings)
+* [Development](#development)
+
+## Setup
+ChatBuzz is a Browser Source. Its width and height match the OBS Browser Source default of 800x600, so it is as simple as putting in the URL and clicking "OK".
+
+Your URL should look like "https://chatbuzz.app/?twitch=CHANNEL", with CHANNEL replaced by your Twitch channel's username. For YouTube, use "https://chatbuzz.app/?youtube=HANDLE" instead, with HANDLE being your channel's handle or its "UC..." channel ID. Either way the URL stays the same from stream to stream, and if you simulcast you can pass both at once — the two chats are counted together, so the same message repeated in either adds to a single repeat.
+
+Leave the browser source's "Control audio via OBS" box ticked so Text-To-Speech is captured in your stream and recording. With it ticked you will not hear it yourself unless you also turn on monitoring for the source: Audio Mixer → gear icon → Advanced Audio Properties → Audio Monitoring → "Monitor and Output". Unticking the box instead sends speech straight to your speakers, where you can hear it but OBS cannot record it.
 
 ## URL Parameters
-I've configured ChatBuzz so that its width and height are the same as the OBS Browser Source's default, 800x600. Because of this, it's as simple as putting in the URL and clicking "OK".
+Add how ever many arguments to the end of the URL as you need, in any order, in the form '&PARAMETER=ARGUMENT'. For example, you may have "https://chatbuzz.app/?twitch=xqc&notts&min=5&dur=10.5&color=red".
 
-Your OBS Browser Source URL should look like "https://chatbuzz.app/?twitch=CHANNEL", with CHANNEL being replaced by your Twitch channel's username (case insensitive). For YouTube, use "https://chatbuzz.app/?youtube=HANDLE" instead, with HANDLE being your channel's handle or its "UC..." channel ID. Either way the URL stays the same from stream to stream. If you simulcast, pass both at once and the two chats are counted together, so the same message repeated in either one adds to a single repeat. In addition, you can also add how ever many arguments to the end as you need, in any order, in the form '&PARAMETER=ARGUMENT'. For example, you may have "https://chatbuzz.app/?twitch=xqc&notts&min=5&dur=10.5&color=red".
+A leading "@" is optional everywhere — `twitch`, `youtube` and `ignore` all accept a name with or without it.
 
 ### Table of Parameters
 | Parameter  | Definition                                                                                                                                    | Data Type | Constraints                                                | Default Value |
@@ -42,18 +51,14 @@ Your OBS Browser Source URL should look like "https://chatbuzz.app/?twitch=CHANN
 | no7tv      | Exclude 7TV emotes                                                                                                                            | bool*     | -                                                          | false         |
 | debug      | Debug mode                                                                                                                                    | bool*     | -                                                          | false         |
 
-
 \* the bool paremeters, nocase–7tv, may be false on default, but I've made it so you don't need to provide "true" for it to be true. Simply include it as an argument e.g. "&topdown&notts" rather than "&topdown=true&notts=true".
-
-A leading "@" is optional everywhere — `twitch`, `youtube` and `ignore` all accept a name with or without it. For `youtube` it also forces the value to be read as a handle rather than a "UC..." channel ID, which only matters in the unlikely case that a handle looks like one.
 
 On Twitch, `ignore` matches the account's permanent username. YouTube has no equivalent, so there it matches the handle shown in chat, which anyone can change — treat it as best effort.
 
-In OBS, leave the browser source's "Control audio via OBS" box ticked so speech is captured in your stream and recording. With it ticked you will not hear it yourself unless you also turn on monitoring for the source: Audio Mixer → gear icon → Advanced Audio Properties → Audio Monitoring → "Monitor and Output". Unticking the box instead sends speech straight to your speakers, where you can hear it but OBS cannot record it.
+### Text-To-Speech
+Speech comes from Google Translate, so it needs an internet connection. It offers one voice per language rather than named voices, and long messages are cut off at around 190 characters.
 
-Text-To-Speech audio comes from Google Translate, so it needs an internet connection. Ad blockers and privacy extensions sometimes block that domain, which silences speech in a normal browser tab - OBS browser sources have no extensions, so they are unaffected. It offers one voice per language rather than named voices, and long messages are cut off at around 190 characters.
-
-YouTube chat comes through a small Cloudflare Worker (`worker/`), because YouTube, unlike Twitch, doesn't let a browser read live chat directly. Nothing to set up to use it. If you fork ChatBuzz and run your own, point at it with `&youtubeproxy=YOUR_WORKER_URL`.
+Ad blockers and privacy extensions sometimes block that domain, which silences speech in a normal browser tab. OBS browser sources have no extensions, so they are unaffected.
 
 ## About
 ChatBuzz is the first personal project that I can be genuinely be proud of. The need to create it came about when I wanted to personally use an OBS Plugin with a certain functionality while streaming on Twitch, but I couldn't find any that fit my needs. Specifically, the Twitch streamer Charborg has a similar program that was developed by Cagelight, seen [here](https://www.youtube.com/watch?v=pFehqYehbUA). I took it upon myself to make a free, open-source, public version.
@@ -81,3 +86,8 @@ I appreciate any and all feedback! Have you encountered any issues? Do you want 
 - Making a demo video ([Setup & Demo (click)](#setup--demo-click))
 - Published to obsproject.com [here](https://obsproject.com/forum/resources/chatbuzz.1757/)
 -->
+
+## Development
+`npm run build` type-checks and bundles `src/` into `dist/bundle.js` with esbuild. That bundle is the deployed artifact, so rebuild and commit it after changing anything in `src/`.
+
+YouTube chat comes through a small Cloudflare Worker in `worker/`, because YouTube, unlike Twitch, doesn't let a browser read live chat directly. Nothing needs setting up to use ChatBuzz. If you fork it and run your own Worker, point at it with `&youtubeproxy=YOUR_WORKER_URL`.
