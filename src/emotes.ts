@@ -33,22 +33,35 @@ function toEmoteMap(emotes: unknown, key: 'name' | 'code'): Map<string, string> 
 // Uses teklynk's https://github.com/teklynk/twitch_api_public
 export async function fetchEmotes(channel: string, noBttv: boolean, noFfz: boolean, no7tv: boolean, debugMode: boolean) {
   const encodedChannel = encodeURIComponent(channel);
-  const [globalJson, userJson, bttvJson, ffzJson, seventvJson] = await Promise.all([
-    fetchJson('https://twitchapi.teklynk.com/getglobalemotes.php'),
-    fetchJson(`https://twitchapi.teklynk.com/getuseremotes.php?channel=${encodedChannel}`),
-    noBttv ? null : fetchJson(`https://twitchapi.teklynk.com/getbttvemotes.php?channel=${encodedChannel}`),
-    noFfz ? null : fetchJson(`https://twitchapi.teklynk.com/getffzemotes.php?channel=${encodedChannel}`),
-    no7tv ? null : fetchJson(`https://twitchapi.teklynk.com/get7tvemotes.php?channel=${encodedChannel}`),
-  ]);
+  // teklynk only returns a channel's own sets, so the services' global emotes -- PepePls
+  // and the like -- were missing entirely. Both global endpoints allow cross-origin reads,
+  // so they are fetched straight from the source rather than through the proxy.
+  const [globalJson, userJson, bttvJson, bttvGlobalJson, ffzJson, seventvJson, seventvGlobalJson] =
+    await Promise.all([
+      fetchJson('https://twitchapi.teklynk.com/getglobalemotes.php'),
+      fetchJson(`https://twitchapi.teklynk.com/getuseremotes.php?channel=${encodedChannel}`),
+      noBttv ? null : fetchJson(`https://twitchapi.teklynk.com/getbttvemotes.php?channel=${encodedChannel}`),
+      noBttv ? null : fetchJson('https://api.betterttv.net/3/cached/emotes/global'),
+      noFfz ? null : fetchJson(`https://twitchapi.teklynk.com/getffzemotes.php?channel=${encodedChannel}`),
+      no7tv ? null : fetchJson(`https://twitchapi.teklynk.com/get7tvemotes.php?channel=${encodedChannel}`),
+      no7tv ? null : fetchJson('https://7tv.io/v3/emote-sets/global'),
+    ]);
 
   twitchEmoteCodeToId = toEmoteMap(globalJson?.data, 'name');
   for (const [name, id] of toEmoteMap(userJson?.data, 'name')) {
     twitchEmoteCodeToId.set(name, id);
   }
-  if (!noBttv) bttvEmoteCodeToId = toEmoteMap(bttvJson, 'code');
+  // Globals first so a channel's own emote of the same name overrides them, as on the sites
+  if (!noBttv) {
+    bttvEmoteCodeToId = toEmoteMap(bttvGlobalJson, 'code');
+    for (const [code, id] of toEmoteMap(bttvJson, 'code')) bttvEmoteCodeToId.set(code, id);
+  }
   if (!noFfz) ffzEmoteCodeToId = toEmoteMap(ffzJson, 'code');
   if (!no7tv) {
-    seventvEmoteCodeToId = toEmoteMap(seventvJson?.emotes, 'name');
+    seventvEmoteCodeToId = toEmoteMap(seventvGlobalJson?.emotes, 'name');
+    for (const [name, id] of toEmoteMap(seventvJson?.emotes, 'name')) {
+      seventvEmoteCodeToId.set(name, id);
+    }
     for (const [name, id] of toEmoteMap(seventvJson?.emote_set?.emotes, 'name')) {
       seventvEmoteCodeToId.set(name, id);
     }
