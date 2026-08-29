@@ -36,13 +36,14 @@ export async function fetchEmotes(channel: string, noBttv: boolean, noFfz: boole
   // teklynk only returns a channel's own sets, so the services' global emotes -- PepePls
   // and the like -- were missing entirely. Both global endpoints allow cross-origin reads,
   // so they are fetched straight from the source rather than through the proxy.
-  const [globalJson, userJson, bttvJson, bttvGlobalJson, ffzJson, seventvJson, seventvGlobalJson] =
+  const [globalJson, userJson, bttvJson, bttvGlobalJson, ffzJson, ffzGlobalJson, seventvJson, seventvGlobalJson] =
     await Promise.all([
       fetchJson('https://twitchapi.teklynk.com/getglobalemotes.php'),
       fetchJson(`https://twitchapi.teklynk.com/getuseremotes.php?channel=${encodedChannel}`),
       noBttv ? null : fetchJson(`https://twitchapi.teklynk.com/getbttvemotes.php?channel=${encodedChannel}`),
       noBttv ? null : fetchJson('https://api.betterttv.net/3/cached/emotes/global'),
       noFfz ? null : fetchJson(`https://twitchapi.teklynk.com/getffzemotes.php?channel=${encodedChannel}`),
+      noFfz ? null : fetchJson('https://api.frankerfacez.com/v1/set/global'),
       no7tv ? null : fetchJson(`https://twitchapi.teklynk.com/get7tvemotes.php?channel=${encodedChannel}`),
       no7tv ? null : fetchJson('https://7tv.io/v3/emote-sets/global'),
     ]);
@@ -56,7 +57,15 @@ export async function fetchEmotes(channel: string, noBttv: boolean, noFfz: boole
     bttvEmoteCodeToId = toEmoteMap(bttvGlobalJson, 'code');
     for (const [code, id] of toEmoteMap(bttvJson, 'code')) bttvEmoteCodeToId.set(code, id);
   }
-  if (!noFfz) ffzEmoteCodeToId = toEmoteMap(ffzJson, 'code');
+  if (!noFfz) {
+    // FFZ nests its globals under sets, each with its own emoticons list
+    const ffzGlobals: unknown[] = [];
+    for (const set of Object.values(ffzGlobalJson?.sets ?? {}) as any[]) {
+      if (Array.isArray(set?.emoticons)) ffzGlobals.push(...set.emoticons);
+    }
+    ffzEmoteCodeToId = toEmoteMap(ffzGlobals, 'name');
+    for (const [code, id] of toEmoteMap(ffzJson, 'code')) ffzEmoteCodeToId.set(code, id);
+  }
   if (!no7tv) {
     seventvEmoteCodeToId = toEmoteMap(seventvGlobalJson?.emotes, 'name');
     for (const [name, id] of toEmoteMap(seventvJson?.emotes, 'name')) {
