@@ -4,7 +4,7 @@
   "description": "Simple OBS Plugin that displays repeated messages from a Twitch or YouTube chat",
   "private": true,
   "scripts": {
-    "build": "npm run typecheck && esbuild src/main.ts --bundle --minify --target=es2017 --outfile=dist/bundle.js",
+    "build": "npm run typecheck && esbuild src/main.ts --bundle --minify --target=es2019 --outfile=dist/bundle.js",
     "typecheck": "tsc --noEmit"
   },
   "keywords": [

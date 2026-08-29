@@ -59,10 +59,9 @@ export async function fetchEmotes(channel: string, noBttv: boolean, noFfz: boole
   }
   if (!noFfz) {
     // FFZ nests its globals under sets, each with its own emoticons list
-    const ffzGlobals: unknown[] = [];
-    for (const set of Object.values(ffzGlobalJson?.sets ?? {}) as any[]) {
-      if (Array.isArray(set?.emoticons)) ffzGlobals.push(...set.emoticons);
-    }
+    const ffzGlobals = (Object.values(ffzGlobalJson?.sets ?? {}) as any[]).flatMap(
+      (set) => set?.emoticons ?? [],
+    );
     ffzEmoteCodeToId = toEmoteMap(ffzGlobals, 'name');
     for (const [code, id] of toEmoteMap(ffzJson, 'code')) ffzEmoteCodeToId.set(code, id);
   }
